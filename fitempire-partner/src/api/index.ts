@@ -1,15 +1,26 @@
 import axios from 'axios';
 
-let rawPartnerBase = (import.meta.env.VITE_API_URL || '').trim();
+// Detect whether running in local development or deployed in production
+const isLocalhost =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === '0.0.0.0');
 
-if (!rawPartnerBase) {
-  if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+let rawPartnerBase = '';
+
+if (isLocalhost) {
+  // Local Development: Always prioritize local backend on port 8080
+  rawPartnerBase =
+    import.meta.env.VITE_LOCAL_API_URL ||
+    (import.meta.env.DEV ? import.meta.env.VITE_API_URL : null) ||
+    'http://localhost:8080/api';
+} else {
+  // Production / Deployed (Vercel, Netlify, Cloud): Use .env.production or relative /api
+  rawPartnerBase = (import.meta.env.VITE_API_URL || '').trim();
+  if (!rawPartnerBase) {
     rawPartnerBase = '/api';
-  } else {
-    rawPartnerBase = 'http://localhost:8080/api';
   }
-} else if (typeof window !== 'undefined' && window.location.protocol === 'https:' && rawPartnerBase.startsWith('http://')) {
-  rawPartnerBase = '/api';
 }
 
 if (rawPartnerBase.endsWith('/')) rawPartnerBase = rawPartnerBase.slice(0, -1);

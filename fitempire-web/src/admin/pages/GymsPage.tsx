@@ -1,3 +1,4 @@
+'use client';
 import { useState } from 'react';
 import {
   Box, Card, CardContent, Typography, TextField, InputAdornment,
@@ -37,14 +38,14 @@ export function GymsPage() {
   const { data: gymsRes, isLoading, isError } = useQuery({
     queryKey: ['gyms', page, rowsPerPage, currentStatusParam],
     queryFn: () => gymsApi.getAll(page, rowsPerPage, currentStatusParam).then((res) => res.data.data),
-    keepPreviousData: true,
+    placeholderData: (prev) => prev,
   });
 
   const approveMutation = useMutation({
     mutationFn: (id: string) => gymsApi.approve(id),
     onSuccess: () => {
       enqueueSnackbar('Gym approved and activated successfully', { variant: 'success' });
-      queryClient.invalidateQueries(['gyms']);
+      queryClient.invalidateQueries({ queryKey: ['gyms'] });
     },
     onError: (err: any) => {
       enqueueSnackbar(err.response?.data?.message || 'Failed to approve gym', { variant: 'error' });
@@ -55,7 +56,7 @@ export function GymsPage() {
     mutationFn: ({ id, reason }: { id: string; reason: string }) => gymsApi.reject(id, reason),
     onSuccess: () => {
       enqueueSnackbar('Gym application rejected', { variant: 'info' });
-      queryClient.invalidateQueries(['gyms']);
+      queryClient.invalidateQueries({ queryKey: ['gyms'] });
       setRejectDialog(false);
       setRejectReason('');
     },

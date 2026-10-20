@@ -37,32 +37,34 @@ FitEmpire is an omni-channel fitness aggregation marketplace, boutique gym opera
 
 ## 🏗️ System Architecture & Monorepo Structure
 
-FitEmpire is organized as a unified monorepo separating client frontends, mobile runtimes, and core backend services:
+FitEmpire is organized as a high-performance monorepo managed with **Turborepo** (`turbo`), cleanly separating Next.js web applications, client frontends, mobile runtimes, and core backend services:
 
 ```text
 FitEmpire/
-├── fitempire-backend/         # Java 21 / Spring Boot 3.2.5 REST API Service
-├── fitempire-mobile/          # React Native / Expo SDK 51 / Android Studio Native Shell
-├── fitempire-partner/         # React 18 / Vite / Tailwind Partner Reception Desk
-├── fitempire-web/             # React 18 / Vite SuperAdmin Backoffice & Landing Page
+├── fitempire-backend/         # Java 21 / Spring Boot 3.2.5 REST API & WebSocket Service (Port 8080)
+├── fitempire-web/             # Next.js 15 (App Router) Landing Page & SuperAdmin Backoffice (Port 3000)
+├── fitempire-partner/         # React 18 / Vite / Tailwind Partner Reception Desk (Port 3001)
+├── fitempire-mobile/          # React Native / Expo SDK 54 / Android Studio Native Shell (Port 8081)
 ├── fitempire-showcase/        # Dual-device live iframe interactive demonstration console
 ├── scripts/                   # AWS deployment scripts, CSV validators, and design generators
 │   └── design_sections/       # 16 individual modular architecture specification chapters
+├── turbo.json                 # Turborepo task pipeline & caching configuration
+├── package.json               # Root monorepo workspace definition
 ├── SYSTEM_DESIGN.md           # Master compiled 2,300+ line technical architecture specification
 ├── ANDROID_STUDIO_APP_GUIDE.md# Native Android compilation and ProGuard reference manual
-├── docker-compose.yml         # Container definitions for Backend, PostgreSQL, and Redis
-└── start-all.bat              # 1-Click local development bootstrapper
+└── docker-compose.yml         # Container definitions for PostgreSQL (PostGIS) and Redis
 ```
 
 ```mermaid
 flowchart TD
     subgraph Clients["Client Applications"]
         M[Member Mobile App<br/>React Native / Android Studio]
-        P[Partner Desk & Scanner<br/>React 18 / Vite]
-        A[SuperAdmin Console<br/>React 18 / Vite]
+        P[Partner Reception Desk<br/>React 18 / Vite]
+        W[Landing & SuperAdmin Console<br/>Next.js 15 App Router]
     end
 
-    subgraph Gateway["Edge Layer"]
+    subgraph Turbo["Monorepo & Edge Layer"]
+        TR[Turborepo Pipeline<br/>Concurrent dev & build caching]
         WAF[Cloudflare Edge / WAF<br/>DDoS Mitigation & Edge SSL]
         ALB[AWS Application Load Balancer]
     end
@@ -78,7 +80,7 @@ flowchart TD
         S3[AWS S3 Bucket<br/>Branding & Gym Photos]
     end
 
-    M & P & A -->|HTTPS / WSS| WAF
+    W & P & M -->|HTTPS / WSS| WAF
     WAF --> ALB
     ALB --> API
     API <--> WS
@@ -93,27 +95,34 @@ flowchart TD
 
 ### 1. Core Backend (`fitempire-backend`)
 * **Language & Runtime:** Java 21 LTS with **Project Loom Virtual Threads** (`spring.threads.virtual.enabled: true`) for high-concurrency, low-memory I/O.
-* **Framework:** Spring Boot 3.2.5 (Spring Security, Spring Data JPA, Hibernate 6.4).
-* **Database & ORM:** PostgreSQL 16 (hosted on **Neon Database** serverless connection pooler), HikariCP connection pool (`poolSize = 10`).
+* **Framework:** Spring Boot 3.2.5 (Spring Security, Spring Data JPA, Hibernate 6.4, Flyway migrations).
+* **Database & ORM:** PostgreSQL 16 with **PostGIS** extension, HikariCP connection pool (`poolSize = 10`).
 * **Caching & Nonces:** Redis 7 (Lettuce client) supporting dynamic 60-second turnstile single-use nonces via atomic `GETDEL`.
 * **Payments:** Razorpay Java SDK with HMAC-SHA256 server-to-server webhook verification (`/v1/payments/webhook`).
 * **Telecom & Messaging:** Twilio Programmable SMS API for real phone OTP delivery.
 * **Resilience:** Resilience4j Circuit Breakers guarding outbound third-party HTTP integrations.
 
-### 2. Mobile App (`fitempire-mobile`)
-* **Framework:** React Native 0.74 with **Expo SDK 51** (TypeScript).
+### 2. Main Web & SuperAdmin Backoffice (`fitempire-web`)
+* **Framework:** **Next.js 15 (App Router)**, React 19, TypeScript.
+* **Architecture:** Server Components for ultra-fast static landing page delivery + Client Components for reactive dashboard analytics.
+* **Security & Auth:** Next.js Edge Middleware (`src/middleware.ts`) enforcing authenticated route protection on `/admin/*` via HTTP-only token verification.
+* **UI & Design System:** Vanilla CSS modern token system (glassmorphism, vibrant gradients) + Material UI 5 for dense administrative data grids and audit views.
+* **Dynamic Linking:** Smart ecosystem link resolver (`src/config/links.ts`) automatically switching between local developer ports and cloud production Vercel URLs.
+
+### 3. Partner Reception Desk (`fitempire-partner`)
+* **Framework:** React 18, Vite 5, TypeScript.
+* **Styling & Icons:** Tailwind CSS 3 with dark-mode palette tokens, Lucide React icons.
+* **Hardware Turnstiles:** Real-time turnstile verification with optical QR scanner, STOMP over SockJS WebSocket feed (`/topic/turnstile/{branchId}`).
+* **Analytics Panels:** Recharts data visualization charts for footfall, peak capacity, and weekly automated settlement tracking.
+
+### 4. Mobile App (`fitempire-mobile`)
+* **Framework:** React Native 0.74 with **Expo SDK 54** (TypeScript).
 * **Native Android Runtime:** Android Studio Gradle (`compileSdkVersion 34`, `targetSdkVersion 34`, Hermes JavaScript Engine).
 * **Hardware Integrations:**
   * `expo-brightness`: Instant screen brightness boost for high-contrast optical turnstile barcode readers.
-  * `expo-camera`: Real-time QR scanner for front-desk reception tablets.
+  * `expo-camera`: Real-time 0.2s turnstile QR scanner for front-desk reception tablets.
   * `expo-haptics`: Tactile haptic confirmation feedback on scan approval.
   * `expo-secure-store`: Hardware keystore encryption for long-lived refresh tokens.
-
-### 3. Partner & Admin Frontends (`fitempire-partner` & `fitempire-web`)
-* **Framework:** React 18, Vite 5, TypeScript.
-* **Styling & Icons:** Tailwind CSS 3 with dark-mode palette tokens, Lucide React icons.
-* **Real-Time Turnstiles:** STOMP protocol over SockJS WebSocket subscribing to `/topic/turnstile/{branchId}`.
-* **Analytics Panels:** Recharts data visualization charts for footfall and occupancy tracking.
 
 ---
 
@@ -123,6 +132,7 @@ flowchart TD
 * [Node.js](https://nodejs.org/) (v18 or v20 LTS)
 * [Java JDK 21](https://www.oracle.com/java/technologies/downloads/)
 * [Maven 3.9+](https://maven.apache.org/download.cgi)
+* [Docker & Docker Compose](https://www.docker.com/)
 * [Git](https://git-scm.com/)
 
 ---
@@ -134,53 +144,38 @@ git clone https://github.com/ayushgupta9906/FitEmpire.git
 cd FitEmpire
 ```
 
-Create or verify the root `.env` file:
+Create or verify the root `.env` file (copied from `.env.example`):
 
-```env
-# Database Configuration (PostgreSQL / Neon)
-DB_HOST=your-neon-hostname.aws.neon.tech
-DB_USER=your_db_username
-DB_PASSWORD=your_neon_password
-SPRING_DATASOURCE_URL=jdbc:postgresql://your-neon-hostname.aws.neon.tech:5432/neondb?sslmode=require
+```bash
+cp .env.example .env
+```
 
-# Razorpay Payment Gateway
-RAZORPAY_KEY_ID=rzp_test_your_key_id
-RAZORPAY_KEY_SECRET=your_razorpay_secret
-RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
+Start the PostgreSQL (with PostGIS) and Redis background containers:
 
-# Twilio SMS OTP Gateway
-TWILIO_ACCOUNT_SID=your_twilio_account_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_FROM_NUMBER=+1234567890
-
-# JWT Security
-JWT_SECRET=your_256_bit_secure_cryptographic_secret_key_here
+```bash
+docker-compose up -d
 ```
 
 ---
 
-### Step 2: 1-Click Service Bootstrapper
+### Step 2: 1-Command Monorepo Bootstrapper (Turborepo)
 
-#### On Windows:
-Double-click **`start-all.bat`** (or run via PowerShell):
-```powershell
-.\start-all.ps1
-```
+From the root directory, simply run:
 
-#### On Linux / macOS:
 ```bash
-chmod +x start.sh
-./start.sh
+npm install
+npm run dev
 ```
 
-The script automatically terminates conflicting ports and launches:
-| Service | Local URL | Port |
-|---|---|:---:|
-| **Spring Boot API** | `http://localhost:8080` | `8080` |
-| **Admin Console** | `http://localhost:3000` | `3000` |
-| **Partner Desk Portal**| `http://localhost:3001` | `3001` |
-| **Expo Mobile Dev Server** | `http://localhost:8081` | `8081` |
-| **Interactive Showcase** | `http://localhost:8082` | `8082` |
+Turborepo will automatically orchestrate and run all workspaces concurrently in parallel:
+
+| Workspace | Technology | Local URL | Port |
+|---|---|---|:---:|
+| **`fitempire-web`** | Next.js 15 App Router | `http://localhost:3000` | `3000` |
+| **`fitempire-partner`** | Vite + React 18 | `http://localhost:3001` | `3001` |
+| **`fitempire-backend`** | Spring Boot 3 / Java 21 | `http://localhost:8080` | `8080` |
+
+*Note: You can access the SuperAdmin Console directly at `http://localhost:3000/admin`.*
 
 ---
 

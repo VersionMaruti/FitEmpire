@@ -1,23 +1,26 @@
+"use client"
 import React, { useState, useEffect } from 'react';
-import { 
-  Smartphone, 
-  QrCode, 
-  CheckCircle2, 
-  RefreshCw, 
-  ShieldCheck, 
-  Dumbbell, 
-  Clock, 
-  MapPin, 
-  ArrowRight, 
-  Scan, 
-  Building2, 
+import {
+  Smartphone,
+  QrCode,
+  CheckCircle2,
+  RefreshCw,
+  ShieldCheck,
+  Dumbbell,
+  Clock,
+  MapPin,
+  ArrowRight,
+  Scan,
+  Building2,
   Zap,
   Sparkles,
   Send
 } from 'lucide-react';
+import { getMemberAppUrl, getPartnerAppUrl } from '@/config/links';
+
 
 interface AppShowcaseProps {
-  onOpenAppModal: () => void;
+  onOpenAppModal?: () => void;
 }
 
 export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
@@ -51,10 +54,10 @@ export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
   return (
     <section id="apps" className="app-showcase-purple-section">
       <div className="container">
-        
+
         {/* Main Card */}
         <div className="app-showcase-main-card executive-card">
-          
+
           {/* Left Column */}
           <div className="app-info-col">
             <div className="badge-pill-purple">
@@ -74,10 +77,10 @@ export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
             {/* SMS Link Form */}
             <form onSubmit={handleSendLink} className="sms-purple-form">
               <div className="sms-input-group">
-                <input 
-                  type="tel" 
-                  placeholder="Enter 10-digit Mobile (+91)" 
-                  value={mobileNumber} 
+                <input
+                  type="tel"
+                  placeholder="Enter 10-digit Mobile (+91)"
+                  value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   className="sms-field"
                   required
@@ -119,13 +122,13 @@ export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
 
             {/* App Toggle Tabs */}
             <div className="app-mode-switch">
-              <button 
+              <button
                 className={`switch-tab ${activeApp === 'member' ? 'active' : ''}`}
                 onClick={() => setActiveApp('member')}
               >
                 1. Member App Simulator
               </button>
-              <button 
+              <button
                 className={`switch-tab ${activeApp === 'partner' ? 'active' : ''}`}
                 onClick={() => setActiveApp('partner')}
               >
@@ -137,7 +140,7 @@ export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
           {/* Right Column: Phone Mockup */}
           <div className="app-phone-col">
             <div className="phone-bezel">
-              
+
               <div className="phone-top-notch">
                 <div className="camera-dot"></div>
                 <div className="speaker-bar"></div>
@@ -146,7 +149,7 @@ export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
               <div className="phone-screen">
                 {activeApp === 'member' ? (
                   <div className="member-screen-content">
-                    
+
                     {/* Header */}
                     <div className="phone-header-row">
                       <div>
@@ -158,25 +161,25 @@ export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
 
                     {/* Navigation Pills inside Phone */}
                     <div className="phone-sub-nav">
-                      <button 
+                      <button
                         className={`p-nav-pill ${memberScreen === 'ticket' ? 'active' : ''}`}
                         onClick={() => setMemberScreen('ticket')}
                       >
                         60s QR
                       </button>
-                      <button 
+                      <button
                         className={`p-nav-pill ${memberScreen === 'explore' ? 'active' : ''}`}
                         onClick={() => setMemberScreen('explore')}
                       >
                         Gyms
                       </button>
-                      <button 
+                      <button
                         className={`p-nav-pill ${memberScreen === 'ai' ? 'active' : ''}`}
                         onClick={() => setMemberScreen('ai')}
                       >
                         AI ARIA
                       </button>
-                      <button 
+                      <button
                         className={`p-nav-pill ${memberScreen === 'freeze' ? 'active' : ''}`}
                         onClick={() => setMemberScreen('freeze')}
                       >
@@ -269,7 +272,7 @@ export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
 
                     {/* Bottom link */}
                     <div className="phone-bottom-cta">
-                      <a href="http://localhost:8081" target="_blank" rel="noreferrer" className="phone-open-link">
+                      <a href={getMemberAppUrl()} target="_blank" rel="noreferrer" className="phone-open-link">
                         <span>Launch Full Mobile Web App</span>
                         <ArrowRight size={12} />
                       </a>
@@ -313,6 +316,13 @@ export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
                         <strong>₹21,300</strong>
                         <span>Weekly Payout</span>
                       </div>
+                    </div>
+
+                    <div className="phone-bottom-cta" style={{ marginTop: 12 }}>
+                      <a href={getPartnerAppUrl()} target="_blank" rel="noreferrer" className="phone-open-link">
+                        <span>Launch Partner Reception Portal</span>
+                        <ArrowRight size={12} />
+                      </a>
                     </div>
                   </div>
                 )}

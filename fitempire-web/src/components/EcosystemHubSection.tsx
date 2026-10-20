@@ -1,11 +1,12 @@
+'use client';
 import React, { useState } from 'react';
-import { 
-  Smartphone, 
-  Building2, 
-  ShieldCheck, 
-  Sparkles, 
-  QrCode, 
-  ArrowRight, 
+import {
+  Smartphone,
+  Building2,
+  ShieldCheck,
+  Sparkles,
+  QrCode,
+  ArrowRight,
   ExternalLink,
   Zap,
   Lock,
@@ -13,11 +14,12 @@ import {
   Activity,
   CheckCircle2
 } from 'lucide-react';
+import { getPartnerAppUrl, getMemberAppUrl } from '@/config/links';
 
 interface EcosystemHubProps {
-  onOpenAppModal: () => void;
-  onOpenPartnerModal: () => void;
-  onOpenAdminModal: () => void;
+  onOpenAppModal?: () => void;
+  onOpenPartnerModal?: () => void;
+  onOpenAdminModal?: () => void;
 }
 
 const APPS = [
@@ -32,7 +34,7 @@ const APPS = [
     badge: 'MEMBER PASS',
     badgeClass: 'purple',
     actionText: 'Open Member App',
-    actionUrl: 'https://fitempiremobile.vercel.app',
+    actionUrl: getMemberAppUrl(),
     isModal: false,
     stats: ['12,000+ Gyms', '60s Dynamic QR', 'ARIA AI Coach', '1-Tap Freeze']
   },
@@ -47,7 +49,7 @@ const APPS = [
     badge: 'PARTNER GATEWAY',
     badgeClass: 'indigo',
     actionText: 'Open Partner Portal',
-    actionUrl: 'https://fitempirepartner.vercel.app',
+    actionUrl: getPartnerAppUrl(),
     isModal: false,
     stats: ['0.2s Turnstile Scan', 'Weekly Bank Payout', '100% Tax GST Invoicing', 'Zero Lock-in']
   },
@@ -62,7 +64,7 @@ const APPS = [
     badge: 'ADMIN CONSOLE',
     badgeClass: 'dark',
     actionText: 'Launch Admin Console',
-    actionUrl: 'https://fitempire.tech/?view=admin',
+    actionUrl: '/admin',
     isModal: false,
     stats: ['Gym Approvals', 'Settlement Payouts', 'User Management', 'Real-time BI']
   },
@@ -83,15 +85,15 @@ const APPS = [
   }
 ];
 
-export const EcosystemHubSection: React.FC<EcosystemHubProps> = ({ 
-  onOpenAppModal, 
+export const EcosystemHubSection: React.FC<EcosystemHubProps> = ({
+  onOpenAppModal,
   onOpenPartnerModal,
-  onOpenAdminModal 
+  onOpenAdminModal
 }) => {
   return (
     <section id="ecosystem-apps" className="ecosystem-hub-section">
       <div className="container">
-        
+
         {/* Header */}
         <div className="hub-header-center">
           <div className="badge-pill-purple">
@@ -113,7 +115,7 @@ export const EcosystemHubSection: React.FC<EcosystemHubProps> = ({
 
             return (
               <div key={app.id} className="hub-app-card executive-card">
-                
+
                 <div className="hub-card-header">
                   <div className={`hub-icon-wrap ${app.badgeClass}`}>
                     <Icon size={22} />
@@ -147,16 +149,16 @@ export const EcosystemHubSection: React.FC<EcosystemHubProps> = ({
                       <ArrowRight size={14} />
                     </a>
                   ) : app.id === 'admin-app' ? (
-                    <button onClick={onOpenAdminModal} className="btn-outline-dark w-full">
+                    <button onClick={onOpenAdminModal || (() => { window.location.href = '/admin'; })} className="btn-outline-dark w-full">
                       <ShieldCheck size={15} />
                       <span>{app.actionText}</span>
                       <ArrowRight size={14} />
                     </button>
                   ) : (
-                    <a 
-                      href={app.actionUrl} 
-                      target="_blank" 
-                      rel="noreferrer" 
+                    <a
+                      href={app.actionUrl}
+                      target="_blank"
+                      rel="noreferrer"
                       className={app.id === 'main-app' ? 'btn-purple-primary w-full' : 'btn-purple-secondary w-full'}
                     >
                       <Icon size={15} />

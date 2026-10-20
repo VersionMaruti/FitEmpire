@@ -1,5 +1,6 @@
+'use client';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import {
   Box, Card, CardContent, TextField, Button, Typography,
@@ -28,7 +29,7 @@ export function LoginPage() {
     },
   });
   const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
+  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
   const onSubmit = async (data: LoginForm) => {
@@ -49,26 +50,15 @@ export function LoginPage() {
         refreshToken,
       }));
 
+      document.cookie = `fitempire_access_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
+
+
       enqueueSnackbar('Login successful.', { variant: 'success' });
-      navigate('/dashboard');
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectPath = searchParams.get('from') || '/admin/dashboard';
+      router.push(redirectPath);
     } catch (e: any) {
-      console.error(e);
-      // If admin credentials match, provide instant authenticated fallback session
-      if (data.email.trim().toLowerCase().includes('admin') || data.email.trim().toLowerCase().includes('super')) {
-        dispatch(setCredentials({
-          user: {
-            id: 'super-admin-root',
-            email: data.email.trim(),
-            firstName: 'Super Admin',
-            role: 'SUPER_ADMIN',
-          },
-          accessToken: 'super_admin_verified_jwt',
-          refreshToken: 'super_admin_refresh_token',
-        }));
-        enqueueSnackbar('Super Admin authenticated successfully.', { variant: 'success' });
-        navigate('/dashboard');
-        return;
-      }
+      console.error('Login authentication error:', e);
       const msg = e.response?.data?.message || 'Login failed. Please check your credentials.';
       enqueueSnackbar(msg, { variant: 'error' });
     } finally {
@@ -142,16 +132,16 @@ export function LoginPage() {
                 boxShadow: '0 10px 30px rgba(108, 99, 255, 0.45)',
               }}
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="38" 
-                height="38" 
-                viewBox="0 0 24 24" 
-                fill="none" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="38"
+                height="38"
+                viewBox="0 0 24 24"
+                fill="none"
                 stroke="#FFFFFF"
-                strokeWidth="2.3" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
+                strokeWidth="2.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}
               >
                 <path d="M6.5 6.5 17.5 17.5" />

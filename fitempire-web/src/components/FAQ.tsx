@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from 'react';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 
@@ -34,7 +35,7 @@ export const FAQ: React.FC = () => {
   return (
     <section id="faq" className="faq-purple-section">
       <div className="container">
-        
+
         <div className="faq-header-center">
           <div className="badge-pill-purple">
             <HelpCircle size={13} className="text-purple" />
@@ -49,8 +50,8 @@ export const FAQ: React.FC = () => {
           {FAQS.map((faq, i) => {
             const isOpen = openIdx === i;
             return (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className={`faq-accordion-item executive-card ${isOpen ? 'active' : ''}`}
                 onClick={() => setOpenIdx(isOpen ? null : i)}
               >

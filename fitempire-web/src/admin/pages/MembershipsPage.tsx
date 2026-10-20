@@ -1,3 +1,4 @@
+'use client';
 import { useState } from 'react';
 import {
   Box, Card, CardContent, Typography, TextField, InputAdornment,
@@ -23,7 +24,7 @@ export function MembershipsPage() {
   const { data: membershipsRes, isLoading, isError } = useQuery({
     queryKey: ['memberships', page, rowsPerPage],
     queryFn: () => membershipsApi.getAll(page, rowsPerPage).then((res) => res.data.data),
-    keepPreviousData: true,
+    placeholderData: (prev) => prev,
   });
 
   const memberships = membershipsRes?.content || [];

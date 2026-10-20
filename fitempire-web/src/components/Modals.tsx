@@ -1,18 +1,20 @@
+"use client"
 import React, { useState } from 'react';
-import { 
-  X, 
-  CheckCircle2, 
-  Smartphone, 
-  QrCode, 
-  Building2, 
-  CreditCard, 
-  ArrowRight, 
-  ShieldCheck, 
-  Sparkles, 
-  Clock, 
+import {
+  X,
+  CheckCircle2,
+  Smartphone,
+  QrCode,
+  Building2,
+  CreditCard,
+  ArrowRight,
+  ShieldCheck,
+  Sparkles,
+  Clock,
   Send,
   Zap
 } from 'lucide-react';
+import { getPartnerAppUrl, getMemberAppUrl } from '@/config/links';
 
 interface AppModalProps {
   isOpen: boolean;
@@ -94,10 +96,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        <a 
-          href="https://fitempire.tech/?view=admin"
-          target="_blank" 
-          rel="noreferrer" 
+        <a
+          href="/admin"
           className="btn-purple-primary w-full"
           style={{ padding: '12px', fontSize: '14px' }}
         >
@@ -144,7 +144,7 @@ export const AppDownloadModal: React.FC<AppModalProps> = ({ isOpen, onClose }) =
               <div className="qr-box-caption">Scan in Expo Go</div>
             </div>
 
-            <a href="https://fitempiremobile.vercel.app" target="_blank" rel="noreferrer" className="btn-purple-primary w-full">
+            <a href={getMemberAppUrl()} target="_blank" rel="noreferrer" className="btn-purple-primary w-full">
               <span>Open Member Web App</span>
               <ArrowRight size={14} />
             </a>
@@ -161,7 +161,7 @@ export const AppDownloadModal: React.FC<AppModalProps> = ({ isOpen, onClose }) =
               <div className="qr-box-caption">Gym Manager Gate</div>
             </div>
 
-            <a href="https://fitempirepartner.vercel.app" target="_blank" rel="noreferrer" className="btn-purple-secondary w-full">
+            <a href={getPartnerAppUrl()} target="_blank" rel="noreferrer" className="btn-purple-secondary w-full">
               <span>Open Partner Portal</span>
               <ArrowRight size={14} />
             </a>
@@ -206,8 +206,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({ gym, isOpen, onClose
               <label className="slot-picker-label">Select Preferred Workout Time Slot:</label>
               <div className="slot-chips-list">
                 {['06:00 AM - 07:30 AM', '07:30 AM - 09:00 AM', '12:00 PM - 01:30 PM (Off-Peak)', '06:00 PM - 07:30 PM', '08:00 PM - 09:30 PM'].map((slot) => (
-                  <button 
-                    key={slot} 
+                  <button
+                    key={slot}
                     className={`slot-chip-btn ${slotTime === slot ? 'active' : ''}`}
                     onClick={() => setSlotTime(slot)}
                   >
@@ -245,15 +245,15 @@ export const BookingModal: React.FC<BookingModalProps> = ({ gym, isOpen, onClose
             </div>
             <h3 className="modal-heading">Workout Slot Confirmed!</h3>
             <p className="modal-subheading">Your pass for <strong>{gym.name}</strong> on {slotTime} has been generated.</p>
-            
+
             <div className="pass-token-badge">
               TOKEN: EMP-BOOK-{Math.floor(1000 + Math.random() * 9000)}
             </div>
-            
+
             <p className="pass-instructions-text">
               Simply show this token or open the FitEmpire app at reception for turnstile entry.
             </p>
-            
+
             <button className="btn-purple-primary w-full" onClick={onClose}>
               Done
             </button>
@@ -306,20 +306,20 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ plan, isOpen, onCl
             </div>
 
             <div className="checkout-inputs-group">
-              <input 
-                type="text" 
-                placeholder="Full Name" 
-                value={userName} 
-                onChange={(e) => setUserName(e.target.value)} 
-                className="modal-form-input" 
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                className="modal-form-input"
                 required
               />
-              <input 
-                type="tel" 
-                placeholder="Mobile Number (+91)" 
-                value={userPhone} 
-                onChange={(e) => setUserPhone(e.target.value)} 
-                className="modal-form-input" 
+              <input
+                type="tel"
+                placeholder="Mobile Number (+91)"
+                value={userPhone}
+                onChange={(e) => setUserPhone(e.target.value)}
+                className="modal-form-input"
                 required
               />
             </div>
@@ -339,7 +339,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ plan, isOpen, onCl
             <p className="pass-instructions-text" style={{ marginBottom: 20 }}>
               Your universal access pass for 12,000+ gyms is now live on mobile number <strong>{userPhone || '+91-9876543210'}</strong>.
             </p>
-            <a href="http://localhost:8081" target="_blank" rel="noreferrer" className="btn-purple-primary w-full">
+            <a href={getMemberAppUrl()} target="_blank" rel="noreferrer" className="btn-purple-primary w-full">
               <span>Open FitEmpire App & View Pass</span>
               <ArrowRight size={14} />
             </a>

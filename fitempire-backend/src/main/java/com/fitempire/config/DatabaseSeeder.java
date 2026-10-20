@@ -190,8 +190,11 @@ public class DatabaseSeeder implements CommandLineRunner {
         if (admin == null && partner == null) return;
         User primaryOwner = partner != null ? partner : admin;
 
-        if (gymRepository.count() == 0) {
+        if (gymRepository.count() == 0 || gymBranchRepository.count() == 0) {
             log.info("Seeding gym and partner centers...");
+            if (gymRepository.count() > 0 && gymBranchRepository.count() == 0) {
+                gymRepository.deleteAll();
+            }
 
             createGymCenter(primaryOwner, "Gold's Gym Elite", GymCategory.GYM,
                     "Premium gym with top tier cardio and weight equipment.", "Koramangala 5th Block", "Bangalore", "Karnataka", "560095");
@@ -293,7 +296,13 @@ public class DatabaseSeeder implements CommandLineRunner {
             if (gyms.isEmpty()) return;
             Gym gym = gyms.get(0);
             List<GymBranch> branches = gymBranchRepository.findByGymIdAndDeletedFalse(gym.getId());
-            GymBranch branch = branches.isEmpty() ? null : branches.get(0);
+            GymBranch branch = branches.isEmpty() 
+                    ? gymBranchRepository.findAll().stream().findFirst().orElse(null) 
+                    : branches.get(0);
+            if (branch == null) {
+                log.warn("Cannot seed fitness classes: No gym branch available.");
+                return;
+            }
 
             createClass(gym, branch, "High-Intensity Crossfit", "Explosive strength conditioning and cardio intervals.", 45, ClassDifficulty.INTERMEDIATE);
             createClass(gym, branch, "Power Yoga & Core", "Vinyasa flow targeting core stability, flexibility and mindful breathing.", 60, ClassDifficulty.ALL_LEVELS);
@@ -317,13 +326,21 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private void seedBookingsAndPayments() {
         if (bookingRepository.count() == 0) {
-            User customer = userRepository.findByEmailAndDeletedFalse("testuser@fitempire.in").orElse(null);
+            User customer = userRepository.findByEmailAndDeletedFalse("testuser@fitempire.in")
+                    .or(() -> userRepository.findByEmailAndDeletedFalse("testuser@fitempire.tech"))
+                    .orElse(null);
             if (customer == null) return;
             List<Gym> gyms = gymRepository.findAll();
             if (gyms.isEmpty()) return;
             Gym gym = gyms.get(0);
             List<GymBranch> branches = gymBranchRepository.findByGymIdAndDeletedFalse(gym.getId());
-            GymBranch branch = branches.isEmpty() ? null : branches.get(0);
+            GymBranch branch = branches.isEmpty() 
+                    ? gymBranchRepository.findAll().stream().findFirst().orElse(null) 
+                    : branches.get(0);
+            if (branch == null) {
+                log.warn("Cannot seed bookings: No gym branch available.");
+                return;
+            }
 
             for (int i = 1; i <= 3; i++) {
                 Booking b = new Booking();
@@ -336,10 +353,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                 b.setQrToken("FP-" + (8890 + i));
                 b.setAmountPaid(new BigDecimal("299.00"));
                 b.setCheckedInAt(Instant.now().minus(i * 15L, ChronoUnit.MINUTES));
-                bookingRepository.save(b);
+                Booking savedBooking = bookingRepository.save(b);
 
                 Payment p = new Payment();
                 p.setUser(customer);
+                p.setBookingId(savedBooking.getId());
                 p.setAmount(new BigDecimal("299.00"));
                 p.setNetAmount(new BigDecimal("299.00"));
                 p.setGstAmount(BigDecimal.ZERO);
@@ -350,6 +368,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 p.setPaymentMethod(PaymentMethod.UPI);
                 p.setPaymentGateway(com.fitempire.modules.payments.entity.PaymentGateway.RAZORPAY);
                 p.setGatewayPaymentId("pay_" + UUID.randomUUID().toString().substring(0, 12));
+                p.setSettled(true);
                 p.setCreatedAt(Instant.now());
                 p.setUpdatedAt(Instant.now());
                 paymentRepository.save(p);

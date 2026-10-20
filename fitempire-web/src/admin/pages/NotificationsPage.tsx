@@ -1,4 +1,6 @@
+'use client';
 import { useState } from 'react';
+
 import {
   Box, Card, CardContent, Typography, TextField, Button, Grid, MenuItem,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,

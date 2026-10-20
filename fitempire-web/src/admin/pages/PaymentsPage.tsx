@@ -1,3 +1,4 @@
+'use client';
 import { useState } from 'react';
 import {
   Box, Card, CardContent, Typography, Table, TableBody, TableCell,
@@ -32,7 +33,7 @@ export function PaymentsPage() {
   const { data: paymentsRes, isLoading, isError } = useQuery({
     queryKey: ['payments', page, rowsPerPage],
     queryFn: () => paymentsApi.getAll(page, rowsPerPage).then((res) => res.data.data),
-    keepPreviousData: true,
+    placeholderData: (prev) => prev,
   });
 
   const refundMutation = useMutation({
@@ -40,7 +41,7 @@ export function PaymentsPage() {
       paymentsApi.processRefund(id, amount, reason),
     onSuccess: () => {
       enqueueSnackbar('Refund initiated successfully', { variant: 'success' });
-      queryClient.invalidateQueries(['payments']);
+      queryClient.invalidateQueries({ queryKey: ['payments'] });
       setRefundDialog(false);
       setRefundReason('');
     },

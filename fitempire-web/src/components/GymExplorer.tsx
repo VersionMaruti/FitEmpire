@@ -1,10 +1,16 @@
+'use client';
 import React, { useState } from 'react';
-import { 
-  MapPin, 
-  Star, 
-  Dumbbell, 
-  ShieldCheck, 
-  Search, 
+import dynamic from 'next/dynamic';
+const BookingModal = dynamic(
+  () => import('./Modals').then((mod) => mod.BookingModal),
+  { ssr: false }
+);
+import {
+  MapPin,
+  Star,
+  Dumbbell,
+  ShieldCheck,
+  Search,
   Flame,
   ArrowRight,
   Check,
@@ -12,7 +18,7 @@ import {
 } from 'lucide-react';
 
 interface GymExplorerProps {
-  onBookGym: (gym: any) => void;
+  onBookGym?: (gym: any) => void;
 }
 
 const SAMPLE_GYMS = [
@@ -106,9 +112,21 @@ export const GymExplorer: React.FC<GymExplorerProps> = ({ onBookGym }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchFilter, setSearchFilter] = useState('');
 
+
+  // Local state for the Booking Modal
+  const [bookingGym, setBookingGym] = useState<any | null>(null);
+  const handleBookClick = (gym: any) => {
+    if (onBookGym) {
+      onBookGym(gym);
+    } else {
+      setBookingGym(gym);
+    }
+  };
+
+
   const filteredGyms = SAMPLE_GYMS.filter((gym) => {
     const matchesCat = selectedCategory === 'all' || gym.category === selectedCategory;
-    const matchesQuery = 
+    const matchesQuery =
       gym.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
       gym.area.toLowerCase().includes(searchFilter.toLowerCase()) ||
       gym.city.toLowerCase().includes(searchFilter.toLowerCase());
@@ -118,7 +136,7 @@ export const GymExplorer: React.FC<GymExplorerProps> = ({ onBookGym }) => {
   return (
     <section id="explore-gyms" className="gyms-purple-section">
       <div className="container">
-        
+
         {/* Section Heading */}
         <div className="gyms-header-center">
           <div className="badge-pill-purple">
@@ -137,8 +155,8 @@ export const GymExplorer: React.FC<GymExplorerProps> = ({ onBookGym }) => {
         <div className="gyms-filter-toolbar executive-card">
           <div className="gym-search-box">
             <Search size={16} className="text-purple" />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search by gym name, locality or city..."
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
@@ -146,37 +164,37 @@ export const GymExplorer: React.FC<GymExplorerProps> = ({ onBookGym }) => {
           </div>
 
           <div className="categories-pill-row">
-            <button 
+            <button
               className={`cat-pill ${selectedCategory === 'all' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('all')}
             >
               All Categories ({SAMPLE_GYMS.length})
             </button>
-            <button 
+            <button
               className={`cat-pill ${selectedCategory === 'gym' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('gym')}
             >
               Gym Workouts
             </button>
-            <button 
+            <button
               className={`cat-pill ${selectedCategory === 'crossfit' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('crossfit')}
             >
               CrossFit / HIIT
             </button>
-            <button 
+            <button
               className={`cat-pill ${selectedCategory === 'yoga' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('yoga')}
             >
               Yoga & Pilates
             </button>
-            <button 
+            <button
               className={`cat-pill ${selectedCategory === 'swimming' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('swimming')}
             >
               Swimming
             </button>
-            <button 
+            <button
               className={`cat-pill ${selectedCategory === 'boxing' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('boxing')}
             >
@@ -189,7 +207,7 @@ export const GymExplorer: React.FC<GymExplorerProps> = ({ onBookGym }) => {
         <div className="gyms-cards-grid">
           {filteredGyms.map((gym) => (
             <div key={gym.id} className="gym-item-card executive-card">
-              
+
               <div className="gym-img-wrap">
                 <img src={gym.image} alt={gym.name} className="g-img" />
                 <span className="g-badge">{gym.badge}</span>
@@ -231,9 +249,9 @@ export const GymExplorer: React.FC<GymExplorerProps> = ({ onBookGym }) => {
                     <span>Included in Pass</span>
                   </div>
 
-                  <button 
+                  <button
                     className="btn-purple-primary btn-book-slot"
-                    onClick={() => onBookGym(gym)}
+                    onClick={() => handleBookClick(gym)}
                   >
                     <span>Book Slot</span>
                     <ArrowRight size={13} />
@@ -246,6 +264,13 @@ export const GymExplorer: React.FC<GymExplorerProps> = ({ onBookGym }) => {
         </div>
 
       </div>
+
+      {/* Lazy-Loaded Booking Modal */}
+      <BookingModal
+        gym={bookingGym}
+        isOpen={Boolean(bookingGym)}
+        onClose={() => setBookingGym(null)}
+      />
 
       <style>{`
         .gyms-purple-section {

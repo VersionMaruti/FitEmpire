@@ -1,3 +1,4 @@
+'use client';
 import {
   Box, Grid, Card, CardContent, Typography, Chip,
   LinearProgress, alpha, CircularProgress
@@ -248,7 +249,7 @@ export function DashboardPage() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="date" stroke="#A0A8C8" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#A0A8C8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${(v/1000).toFixed(0)}k`} />
+                  <YAxis stroke="#A0A8C8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
                   <Tooltip
                     contentStyle={{ background: '#1A1A2E', border: '1px solid rgba(108,99,255,0.2)', borderRadius: 12 }}
                     formatter={(v: any, name: any) => [
@@ -306,43 +307,44 @@ export function DashboardPage() {
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>Recent Activity</Typography>
               {recentActivity.length === 0 ? (
-                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>No recent activity.</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>No recent activity.</Typography>
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {recentActivity.map((item: ActivityItem) => {
                     const color = item.type === 'USER' ? '#43D787' : item.type === 'GYM' ? '#FFB038' : item.type === 'PAYMENT' ? '#6C63FF' : '#FF6584';
                     return (
-                    <Box
-                      key={item.id}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        p: 2,
-                        borderRadius: 2,
-                        background: 'rgba(255,255,255,0.02)',
-                        '&:hover': { background: 'rgba(108, 99, 255, 0.06)' },
-                        transition: 'background 0.15s ease',
-                      }}
-                    >
                       <Box
+                        key={item.id}
                         sx={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: '50%',
-                          background: color,
-                          boxShadow: `0 0 8px ${color}`,
-                          flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          p: 2,
+                          borderRadius: 2,
+                          background: 'rgba(255,255,255,0.02)',
+                          '&:hover': { background: 'rgba(108, 99, 255, 0.06)' },
+                          transition: 'background 0.15s ease',
                         }}
-                      />
-                      <Typography variant="body2" sx={{ flex: 1, color: 'text.primary' }}>
-                        {item.message}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', flexShrink: 0 }}>
-                        {new Date(item.timestamp).toLocaleString()}
-                      </Typography>
-                    </Box>
-                  )})}
+                      >
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            background: color,
+                            boxShadow: `0 0 8px ${color}`,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <Typography variant="body2" sx={{ flex: 1, color: 'text.primary' }}>
+                          {item.message}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', flexShrink: 0 }}>
+                          {new Date(item.timestamp).toLocaleString()}
+                        </Typography>
+                      </Box>
+                    )
+                  })}
                 </Box>
               )}
             </CardContent>

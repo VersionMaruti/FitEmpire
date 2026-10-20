@@ -228,6 +228,8 @@ CREATE TABLE gym_branches (
     opening_time        TIME,
     closing_time        TIME,
     amenities           TEXT[],
+    monthly_membership_price DECIMAL(12,2),
+    per_session_rate    DECIMAL(10,2),
     working_days        VARCHAR(20)[],
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),

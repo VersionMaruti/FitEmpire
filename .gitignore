@@ -40,11 +40,14 @@ web_modules/
 .env.production.local
 .env.local
 
-# Build outputs
+# Build outputs & caches
+.turbo
+**/.turbo/
+.next/
+**/.next/
+out/
 .webpack/
 .parcel-cache
-.next/
-out/
 .nuxt
 dist/
 **/dist/

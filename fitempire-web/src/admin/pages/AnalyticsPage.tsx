@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Card, Grid, CardContent, CircularProgress } from '@mui/material';
 import {

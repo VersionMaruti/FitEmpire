@@ -8,7 +8,7 @@ import java.math.RoundingMode;
 import java.util.UUID;
 
 @Slf4j
-@Service
+@Service("paymentSettlementService")
 public class SettlementService {
 
     private static final BigDecimal PLATFORM_COMMISSION_RATE = new BigDecimal("0.15"); // 15%

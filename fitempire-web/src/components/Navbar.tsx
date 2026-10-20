@@ -1,26 +1,27 @@
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Dumbbell, 
-  MapPin, 
-  ChevronDown, 
-  Menu, 
-  X, 
-  Smartphone, 
-  Building2, 
-  ShieldCheck, 
-  Sparkles, 
-  Utensils, 
-  Tv, 
+import {
+  Dumbbell,
+  MapPin,
+  ChevronDown,
+  Menu,
+  X,
+  Smartphone,
+  Building2,
+  ShieldCheck,
+  Sparkles,
+  Utensils,
+  Tv,
   ArrowRight,
   ExternalLink,
-  Zap
 } from 'lucide-react';
+import { getPartnerAppUrl, getMemberAppUrl } from '@/config/links';
 
 interface NavbarProps {
-  onOpenAppModal: () => void;
-  onOpenPartnerModal: () => void;
-  onOpenCorporateModal: () => void;
-  onOpenAdminModal: () => void;
+  onOpenAppModal?: () => void;
+  onOpenPartnerModal?: () => void;
+  onOpenCorporateModal?: () => void;
+  onOpenAdminModal?: () => void;
 }
 
 const CITIES = [
@@ -75,21 +76,21 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className={`top-navbar-root ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="container nav-layout">
-        
+
         {/* Brand Logo & City Picker */}
         <div className="nav-brand-section">
           <a href="#" className="brand-emblem-wrap">
             <div className="brand-logo-icon">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="20" 
-                height="20" 
-                viewBox="0 0 24 24" 
-                fill="none" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
                 stroke="#FFFFFF"
-                strokeWidth="2.3" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
+                strokeWidth="2.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}
               >
                 <path d="M6.5 6.5 17.5 17.5" />
@@ -113,7 +114,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Elegant City Selector */}
           <div className="nav-city-picker" ref={cityDropdownRef}>
-            <button 
+            <button
               className={`city-select-pill ${cityDropdownOpen ? 'active' : ''}`}
               onClick={() => {
                 setCityDropdownOpen(!cityDropdownOpen);
@@ -151,14 +152,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Center Navigation Links */}
         <nav className="nav-menu-links">
-          
+
           <a href="#explore-gyms" className="nav-direct-link">
             Explore Gyms
           </a>
 
           {/* Products Mega Dropdown */}
           <div className="nav-dropdown-item" ref={productsDropdownRef}>
-            <button 
+            <button
               className={`nav-link-btn ${productsDropdownOpen ? 'active' : ''}`}
               onClick={() => {
                 setProductsDropdownOpen(!productsDropdownOpen);
@@ -172,9 +173,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             {productsDropdownOpen && (
               <div className="products-mega-menu shadow-elevation">
                 <div className="mega-menu-grid">
-                  
-                  <a 
-                    href="#fitpass-service" 
+
+                  <a
+                    href="#fitpass-service"
                     className="mega-menu-card"
                     onClick={() => setProductsDropdownOpen(false)}
                   >
@@ -187,8 +188,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
                   </a>
 
-                  <a 
-                    href="#fitcoach-service" 
+                  <a
+                    href="#fitcoach-service"
                     className="mega-menu-card"
                     onClick={() => setProductsDropdownOpen(false)}
                   >
@@ -201,8 +202,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
                   </a>
 
-                  <a 
-                    href="#fitfeast-service" 
+                  <a
+                    href="#fitfeast-service"
                     className="mega-menu-card"
                     onClick={() => setProductsDropdownOpen(false)}
                   >
@@ -215,8 +216,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
                   </a>
 
-                  <a 
-                    href="#fitpasstv-service" 
+                  <a
+                    href="#fitpasstv-service"
                     className="mega-menu-card"
                     onClick={() => setProductsDropdownOpen(false)}
                   >
@@ -250,9 +251,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right CTA Actions */}
         <div className="nav-right-actions">
-          
-          <button 
-            onClick={onOpenAdminModal}
+
+          <button
+            onClick={onOpenAdminModal || (() => { window.location.href = '/admin'; })}
             className="btn-nav-admin"
             title="Super Admin Governance Console"
           >
@@ -260,18 +261,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Admin</span>
           </button>
 
-          <a 
-            href="https://fitempirepartner.vercel.app"
-            target="_blank" 
-            rel="noreferrer" 
+          <a
+            href={getPartnerAppUrl()}
+            target="_blank"
+            rel="noreferrer"
             className="btn-nav-ghost"
           >
             <Building2 size={13} />
             <span>FitEmpire Partner</span>
           </a>
 
-          <a 
-            href="https://fitempiremobile.vercel.app"
+          <a
+            href={getMemberAppUrl()}
             target="_blank"
             rel="noreferrer"
             className="btn-purple-primary btn-nav-cta"
@@ -281,7 +282,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </a>
 
           {/* Mobile Menu Toggle */}
-          <button 
+          <button
             className="mobile-hamburger-btn"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
@@ -299,19 +300,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             <a href="#explore-gyms" onClick={() => setMobileMenuOpen(false)}>Explore 12,000+ Gyms</a>
             <a href="#plans" onClick={() => setMobileMenuOpen(false)}>Membership Plans</a>
             <a href="#apps" onClick={() => setMobileMenuOpen(false)}>Live App Demo</a>
-            <a href="#corporate" onClick={() => { setMobileMenuOpen(false); onOpenCorporateModal(); }}>Corporate Wellness</a>
-            <a href="#partners" onClick={() => { setMobileMenuOpen(false); onOpenPartnerModal(); }}>Partner Your Gym</a>
-            
+            <a href="#corporate" onClick={() => { setMobileMenuOpen(false); onOpenCorporateModal; }}>Corporate Wellness</a>
+            <a href="#partners" onClick={() => { setMobileMenuOpen(false); onOpenPartnerModal; }}>Partner Your Gym</a>
+
             <div className="mobile-drawer-actions">
-              <button className="btn-nav-admin w-full" onClick={() => { setMobileMenuOpen(false); onOpenAdminModal(); }}>
+              <button className="btn-nav-admin w-full" onClick={() => { setMobileMenuOpen(false); onOpenAdminModal || (() => { window.location.href = '/admin';}) }}>
                 <ShieldCheck size={15} />
                 <span>Super Admin Console</span>
               </button>
 
-              <a 
-                href="https://fitempiremobile.vercel.app"
-                target="_blank" 
-                rel="noreferrer" 
+              <a
+                href={getMemberAppUrl()}
+                target="_blank"
+                rel="noreferrer"
                 className="btn-purple-primary w-full"
               >
                 <Smartphone size={15} />

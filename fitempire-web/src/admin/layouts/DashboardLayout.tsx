@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+'use client';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Box, Drawer, AppBar, Toolbar, List, ListItem, ListItemButton,
   ListItemIcon, ListItemText, Typography, IconButton, Avatar,
-  Badge, Tooltip, Divider, useTheme,
+  Badge, Tooltip, Divider, useTheme, CircularProgress,
 } from '@mui/material';
 import {
   Dashboard, People, FitnessCenter, CardMembership, Payment,
@@ -16,49 +18,82 @@ import { Dumbbell } from 'lucide-react';
 import type { AppDispatch, RootState } from '../store';
 import { logout, toggleSidebar } from '../store';
 import { authApi } from '../api';
+import { getPartnerAppUrl, getMemberAppUrl } from '@/config/links';
 
 const DRAWER_WIDTH = 268;
 const DRAWER_COLLAPSED = 72;
 
 const NAV_ITEMS = [
-  { label: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-  { label: 'Users', icon: <People />, path: '/users' },
-  { label: 'Gyms', icon: <FitnessCenter />, path: '/gyms' },
-  { label: 'Memberships', icon: <CardMembership />, path: '/memberships' },
-  { label: 'Payments', icon: <Payment />, path: '/payments' },
-  { label: 'Bookings', icon: <EventNote />, path: '/bookings' },
-  { label: 'Classes', icon: <CalendarMonth />, path: '/classes' },
-  { label: 'Analytics', icon: <BarChart />, path: '/analytics' },
-  { label: 'Partner Onboarding', icon: <FitnessCenter />, path: '/onboarding' },
-  { label: 'Verification Queue', icon: <VerifiedUser />, path: '/verification' },
-  { label: 'Settlements', icon: <CurrencyRupee />, path: '/settlements' },
-  { label: 'Notifications', icon: <Notifications />, path: '/notifications' },
-  { label: 'Settings', icon: <Settings />, path: '/settings' },
+  { label: 'Dashboard', icon: <Dashboard />, path: '/admin/dashboard' },
+  { label: 'Users', icon: <People />, path: '/admin/users' },
+  { label: 'Gyms', icon: <FitnessCenter />, path: '/admin/gyms' },
+  { label: 'Memberships', icon: <CardMembership />, path: '/admin/memberships' },
+  { label: 'Payments', icon: <Payment />, path: '/admin/payments' },
+  { label: 'Bookings', icon: <EventNote />, path: '/admin/bookings' },
+  { label: 'Classes', icon: <CalendarMonth />, path: '/admin/classes' },
+  { label: 'Analytics', icon: <BarChart />, path: '/admin/analytics' },
+  { label: 'Partner Onboarding', icon: <FitnessCenter />, path: '/admin/onboarding' },
+  { label: 'Verification Queue', icon: <VerifiedUser />, path: '/admin/verification' },
+  { label: 'Settlements', icon: <CurrencyRupee />, path: '/admin/settlements' },
+  { label: 'Notifications', icon: <Notifications />, path: '/admin/notifications' },
+  { label: 'Settings', icon: <Settings />, path: '/admin/settings' },
 ];
 
-export function DashboardLayout() {
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const theme = useTheme();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useDispatch<AppDispatch>();
   const sidebarOpen = useSelector((s: RootState) => s.ui.sidebarOpen);
   const user = useSelector((s: RootState) => s.auth.user);
   const drawerWidth = sidebarOpen ? DRAWER_WIDTH : DRAWER_COLLAPSED;
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const isPartner = user?.role === 'PARTNER' || user?.role === 'GYM_PARTNER';
 
   useEffect(() => {
-    const superAdminOnlyPaths = ['/gyms', '/users', '/onboarding', '/verification', '/settlements', '/analytics', '/memberships'];
-    if (isPartner && superAdminOnlyPaths.some((p) => location.pathname.startsWith(p))) {
-      navigate('/dashboard', { replace: true });
+    if (!mounted) return;
+    const superAdminOnlyPaths = ['/admin/gyms', '/admin/users', '/admin/onboarding', '/admin/verification', '/admin/settlements', '/admin/analytics', '/admin/memberships'];
+    if (isPartner && superAdminOnlyPaths.some((p) => pathname.startsWith(p))) {
+      router.replace('/admin/dashboard');
     }
-  }, [user, location.pathname, isPartner, navigate]);
+  }, [mounted, user, pathname, isPartner, router]);
 
   const handleLogout = async () => {
     try { await authApi.logout(); } catch { /* ignore */ }
+    document.cookie = 'fitempire_access_token=; path=/; max-age=0; SameSite=Lax';
     dispatch(logout());
-    navigate('/login');
+    router.push('/admin/login');
   };
+
+  // Don't render sidebar or topbar on login page
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
+  // Prevent SSR hydration mismatch between server (user: null) and client (user: Gym Partner from localStorage)
+  if (!mounted) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(180deg, #0A0A0F 0%, #0D0D18 100%)',
+          gap: 2,
+        }}
+      >
+        <CircularProgress sx={{ color: '#6C63FF' }} size={38} thickness={4} />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -110,16 +145,16 @@ export function DashboardLayout() {
                   boxShadow: '0 4px 15px rgba(108, 99, 255, 0.45)',
                 }}
               >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="20" 
-                  height="20" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
                   stroke="#FFFFFF"
-                  strokeWidth="2.3" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
+                  strokeWidth="2.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}
                 >
                   <path d="M6.5 6.5 17.5 17.5" />
@@ -156,16 +191,16 @@ export function DashboardLayout() {
                 boxShadow: '0 4px 15px rgba(108, 99, 255, 0.45)',
               }}
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="20" 
-                height="20" 
-                viewBox="0 0 24 24" 
-                fill="none" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
                 stroke="#FFFFFF"
-                strokeWidth="2.3" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
+                strokeWidth="2.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}
               >
                 <path d="M6.5 6.5 17.5 17.5" />
@@ -191,56 +226,59 @@ export function DashboardLayout() {
         <List sx={{ flex: 1, px: 1.5, py: 2, overflowY: 'auto' }}>
           {NAV_ITEMS.filter((item) => {
             if (user?.role === 'PARTNER' || user?.role === 'GYM_PARTNER') {
-              return ['/dashboard', '/bookings', '/classes', '/payments', '/notifications', '/settings'].includes(item.path);
+              return ['/admin/dashboard', '/admin/bookings', '/admin/classes', '/admin/payments', '/admin/notifications', '/admin/settings'].includes(item.path);
             }
             return true;
           }).map((item) => {
-            const active = location.pathname === item.path;
+            const active = pathname === item.path;
             return (
               <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
                 <Tooltip title={!sidebarOpen ? item.label : ''} placement="right">
-                  <ListItemButton
-                    onClick={() => navigate(item.path)}
-                    sx={{
-                      borderRadius: 3,
-                      minHeight: 48,
-                      justifyContent: sidebarOpen ? 'initial' : 'center',
-                      px: sidebarOpen ? 2 : 1.5,
-                      background: active
-                        ? 'linear-gradient(135deg, rgba(108,99,255,0.2) 0%, rgba(255,101,132,0.1) 100%)'
-                        : 'transparent',
-                      border: active ? '1px solid rgba(108, 99, 255, 0.3)' : '1px solid transparent',
-                      '&:hover': {
-                        background: 'rgba(108, 99, 255, 0.1)',
-                        border: '1px solid rgba(108, 99, 255, 0.2)',
-                      },
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    <ListItemIcon
+                  <Link href={item.path} style={{ textDecoration: 'none', color: 'inherit', width: '100%', display: 'block' }}>
+                    <ListItemButton
+                      selected={pathname === item.path}
                       sx={{
-                        minWidth: 0,
-                        mr: sidebarOpen ? 2 : 'auto',
-                        justifyContent: 'center',
-                        color: active ? 'primary.main' : 'text.secondary',
-                        '& svg': { fontSize: 22 },
+                        borderRadius: 3,
+                        minHeight: 48,
+                        justifyContent: sidebarOpen ? 'initial' : 'center',
+                        px: sidebarOpen ? 2 : 1.5,
+                        background: active
+                          ? 'linear-gradient(135deg, rgba(108,99,255,0.2) 0%, rgba(255,101,132,0.1) 100%)'
+                          : 'transparent',
+                        border: active ? '1px solid rgba(108, 99, 255, 0.3)' : '1px solid transparent',
+                        '&:hover': {
+                          background: 'rgba(108, 99, 255, 0.1)',
+                          border: '1px solid rgba(108, 99, 255, 0.2)',
+                        },
+                        transition: 'all 0.15s ease',
                       }}
                     >
-                      {item.icon}
-                    </ListItemIcon>
-                    {sidebarOpen && (
-                      <ListItemText
-                        primary={item.label}
+                      <ListItemIcon
                         sx={{
-                          '& .MuiListItemText-primary': {
-                            fontSize: '0.875rem',
-                            fontWeight: active ? 700 : 500,
-                            color: active ? 'primary.main' : 'text.primary',
-                          },
+                          minWidth: 0,
+                          mr: sidebarOpen ? 2 : 'auto',
+                          justifyContent: 'center',
+                          color: active ? 'primary.main' : 'text.secondary',
+                          '& svg': { fontSize: 22 },
                         }}
-                      />
-                    )}
-                  </ListItemButton>
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                      {sidebarOpen && (
+                        <ListItemText
+                          primary={item.label}
+                          sx={{
+                            '& .MuiListItemText-primary': {
+                              fontSize: '0.875rem',
+                              fontWeight: active ? 700 : 500,
+                              color: active ? 'primary.main' : 'text.primary',
+                            },
+                          }}
+                        />
+                      )}
+                    </ListItemButton>
+                  </Link>
+
                 </Tooltip>
               </ListItem>
             );
@@ -307,7 +345,7 @@ export function DashboardLayout() {
         <AppBar position="static" elevation={0}>
           <Toolbar sx={{ gap: 2 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary', flex: 1 }}>
-              {NAV_ITEMS.find(n => n.path === location.pathname)?.label || 'FitEmpire Admin'}
+              {NAV_ITEMS.find(n => n.path === pathname)?.label || 'FitEmpire Admin'}
             </Typography>
 
             {/* Portal Switcher Buttons */}
@@ -315,7 +353,7 @@ export function DashboardLayout() {
               <Tooltip title="Open FitEmpire Member App">
                 <Box
                   component="a"
-                  href="https://fitempiremobile.vercel.app"
+                  href={getMemberAppUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{
@@ -342,7 +380,7 @@ export function DashboardLayout() {
               <Tooltip title="Open FitEmpire Gym Partner App">
                 <Box
                   component="a"
-                  href="https://fitempirepartner.vercel.app"
+                  href={getPartnerAppUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{
@@ -363,6 +401,31 @@ export function DashboardLayout() {
                   }}
                 >
                   🏢 FitEmpire Partner App
+                </Box>
+              </Tooltip>
+
+              <Tooltip title="Return to Main Website">
+                <Box
+                  component={Link}
+                  href="/"
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.8,
+                    px: 1.5,
+                    py: 0.6,
+                    borderRadius: 2,
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    color: '#10B981',
+                    bgcolor: 'rgba(16, 185, 129, 0.12)',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                    '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.25)' },
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  🌐 Main Website
                 </Box>
               </Tooltip>
             </Box>
@@ -387,7 +450,7 @@ export function DashboardLayout() {
             background: 'linear-gradient(180deg, #0A0A0F 0%, #0D0D18 100%)',
           }}
         >
-          <Outlet />
+          {children}
         </Box>
       </Box>
     </Box>

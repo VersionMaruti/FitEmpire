@@ -1,15 +1,16 @@
+'use client';
 import React, { useState } from 'react';
-import { 
-  Building2, 
-  CheckCircle2, 
-  ChevronRight, 
+import {
+  Building2,
+  CheckCircle2,
+  ChevronRight,
   Calculator,
   ShieldCheck,
   Zap
 } from 'lucide-react';
 
 interface CorporateSectionProps {
-  onOpenCorporateModal: () => void;
+  onOpenCorporateModal?: () => void;
 }
 
 export const CorporateSection: React.FC<CorporateSectionProps> = ({ onOpenCorporateModal }) => {
@@ -21,14 +22,14 @@ export const CorporateSection: React.FC<CorporateSectionProps> = ({ onOpenCorpor
   return (
     <section id="corporate" className="corporate-purple-section">
       <div className="container">
-        
+
         <div className="corporate-main-box executive-card">
           <div className="corp-info-left">
             <div className="badge-pill-purple">
               <Building2 size={13} className="text-purple" />
               <span>FITEMPIRE CORPORATE WELLNESS</span>
             </div>
-            
+
             <h2 className="corp-title">
               Empower Your Workforce with <br />
               <span className="text-purple-gradient">India’s Premier Corporate Wellness Pass</span>
@@ -71,7 +72,7 @@ export const CorporateSection: React.FC<CorporateSectionProps> = ({ onOpenCorpor
                   <span>Number of Employees:</span>
                   <strong className="text-purple">{employeeCount} Employees</strong>
                 </div>
-                <input 
+                <input
                   type="range"
                   min="20"
                   max="2000"

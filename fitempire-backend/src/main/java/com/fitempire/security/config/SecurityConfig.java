@@ -81,7 +81,8 @@ public class SecurityConfig {
                         // Public auth & registration endpoints
                         .requestMatchers(HttpMethod.POST, "/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/auth/oauth2/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/v1/admin/partners/register", "/v1/partners/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/admin/partners/register", "/v1/partners/register")
+                        .permitAll()
                         .requestMatchers("/uploads/**").permitAll()
 
                         // Public content endpoints (read-only gym/class/plan discovery)
@@ -89,7 +90,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/v1/classes/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/trainers/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/membership-plans/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/memberships/plans/**", "/v1/memberships/plans").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/memberships/plans/**", "/v1/memberships/plans")
+                        .permitAll()
 
                         // QR Pass Verification & Live Attendance
                         .requestMatchers(HttpMethod.POST, "/v1/bookings/verify-qr").permitAll()
@@ -113,6 +115,16 @@ public class SecurityConfig {
                         .requestMatchers("/v1/actuator/health", "/v1/actuator/info").permitAll()
 
                         // Admin endpoints
+                        // Allow Admin, Super Admin, and Partners on dashboard overview
+                        .requestMatchers(
+                                "/v1/admin/dashboard/**",
+                                "/v1/admin/bookings/**",
+                                "/v1/admin/classes/**",
+                                "/v1/admin/payments/**")
+                        .hasAnyRole("ADMIN", "SUPER_ADMIN", "PARTNER", "GYM_PARTNER")
+
+                        // Strict Admin-only endpoints (Users management, Gym approvals, Settlements,
+                        // etc.)
                         .requestMatchers("/v1/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/v1/super-admin/**").hasRole("SUPER_ADMIN")
 
@@ -155,8 +167,7 @@ public class SecurityConfig {
                 "http://localhost:19006",
                 "https://fitempire.tech",
                 "https://fitempiremobile.vercel.app",
-                "https://fitempirepartner.vercel.app"
-        ));
+                "https://fitempirepartner.vercel.app"));
 
         // Also add any configured origins from env vars
         if (allowedOrigins != null) {

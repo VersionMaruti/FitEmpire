@@ -1,11 +1,12 @@
+"use client"
 import React, { useState } from 'react';
-import { 
-  Dumbbell, 
-  Sparkles, 
-  Utensils, 
-  Tv, 
-  ChevronRight, 
-  ShieldCheck, 
+import {
+  Dumbbell,
+  Sparkles,
+  Utensils,
+  Tv,
+  ChevronRight,
+  ShieldCheck,
   ArrowRight,
   Activity,
   CheckCircle2,
@@ -14,8 +15,8 @@ import {
 } from 'lucide-react';
 
 interface EcosystemSuiteProps {
-  onOpenPlansModal: () => void;
-  onOpenCorporateModal: () => void;
+  onOpenPlansModal?: () => void;
+  onOpenCorporateModal?: () => void;
 }
 
 const SUITE_SLIDES = [
@@ -70,7 +71,7 @@ export const EcosystemSuite: React.FC<EcosystemSuiteProps> = ({ onOpenPlansModal
 
   return (
     <section className="ecosystem-purple-suite">
-      
+
       {/* Slide Navigation Tabs */}
       <div className="container">
         <div className="suite-header-center">
@@ -103,14 +104,14 @@ export const EcosystemSuite: React.FC<EcosystemSuiteProps> = ({ onOpenPlansModal
         const Icon = slide.icon;
 
         return (
-          <div 
-            key={slide.id} 
+          <div
+            key={slide.id}
             id={slide.id}
-            className="suite-dynamic-banner" 
+            className="suite-dynamic-banner"
             style={{ background: slide.bg }}
           >
             <div className="container suite-grid-inner">
-              
+
               {/* Left Text */}
               <div className="suite-left-text">
                 <div className="suite-badge-pill" style={{ color: slide.accentColor, borderColor: slide.accentColor }}>

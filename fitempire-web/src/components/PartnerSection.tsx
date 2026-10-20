@@ -1,16 +1,17 @@
+'use client';
 import React, { useState } from 'react';
-import { 
-  Building2, 
-  CheckCircle2, 
-  ChevronRight, 
-  TrendingUp, 
+import {
+  Building2,
+  CheckCircle2,
+  ChevronRight,
+  TrendingUp,
   ShieldCheck,
   Zap,
   ArrowRight
 } from 'lucide-react';
 
 interface PartnerSectionProps {
-  onOpenPartnerModal: () => void;
+  onOpenPartnerModal?: () => void;
 }
 
 export const PartnerSection: React.FC<PartnerSectionProps> = ({ onOpenPartnerModal }) => {
@@ -21,7 +22,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({ onOpenPartnerMod
   return (
     <section id="partners" className="partner-purple-section">
       <div className="container">
-        
+
         {/* Section Heading */}
         <div className="partner-header-center">
           <div className="badge-pill-purple">
@@ -37,7 +38,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({ onOpenPartnerMod
         </div>
 
         <div className="partner-cards-grid">
-          
+
           {/* Comparison Card */}
           <div className="partner-col-card executive-card">
             <h3 className="card-headline">Why Gyms Choose FitEmpire Over Old Aggregators</h3>
@@ -98,7 +99,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({ onOpenPartnerMod
                 <span>Expected FitEmpire Members / Day:</span>
                 <strong className="text-purple">{dailyVisits} Check-ins / day</strong>
               </div>
-              <input 
+              <input
                 type="range"
                 min="10"
                 max="150"

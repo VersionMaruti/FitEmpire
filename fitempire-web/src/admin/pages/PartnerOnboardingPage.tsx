@@ -1,3 +1,4 @@
+'use client';
 import { useState, useRef } from 'react';
 import {
   Box, Card, CardContent, Typography, TextField, Button, Grid,
@@ -14,6 +15,8 @@ import {
 } from '../icons';
 import { useSnackbar } from 'notistack';
 import { gymsApi } from '../api';
+import { getPartnerAppUrl } from '@/config/links';
+
 
 const CATEGORIES = [
   { value: 'GYM', label: 'Gym & Fitness Center' },
@@ -407,7 +410,7 @@ export function PartnerOnboardingPage() {
                   size="small"
                   variant="contained"
                   endIcon={<OpenInNew />}
-                  href={`http://localhost:3001/login`}
+                  href={`${getPartnerAppUrl()}/login`}
                   target="_blank"
                   sx={{ bgcolor: '#43D787', color: '#000', fontWeight: 800, textTransform: 'none', '&:hover': { bgcolor: '#38BDF8' } }}
                 >

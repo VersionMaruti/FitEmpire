@@ -1,15 +1,16 @@
+'use client';
 import React, { useState } from 'react';
-import { 
-  Check, 
-  ShieldCheck, 
-  ChevronRight, 
-  Sparkles, 
+import {
+  Check,
+  ShieldCheck,
+  ChevronRight,
+  Sparkles,
   Zap,
   Percent
 } from 'lucide-react';
 
 interface PricingSectionProps {
-  onSelectPlan: (plan: any) => void;
+  onSelectPlan?: (plan: any) => void;
 }
 
 type Tenure = '1m' | '3m' | '6m' | '12m';
@@ -90,7 +91,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
   return (
     <section id="plans" className="pricing-purple-section">
       <div className="container">
-        
+
         {/* Section Title */}
         <div className="pricing-header-center">
           <div className="badge-pill-purple">
@@ -106,27 +107,27 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
 
           {/* Tenure Switcher */}
           <div className="tenure-switch-strip executive-card">
-            <button 
+            <button
               className={`ten-pill ${tenure === '1m' ? 'active' : ''}`}
               onClick={() => setTenure('1m')}
             >
               1 Month
             </button>
-            <button 
+            <button
               className={`ten-pill ${tenure === '3m' ? 'active' : ''}`}
               onClick={() => setTenure('3m')}
             >
               <span>3 Months</span>
               <span className="ten-discount-badge">Save 15%</span>
             </button>
-            <button 
+            <button
               className={`ten-pill ${tenure === '6m' ? 'active' : ''}`}
               onClick={() => setTenure('6m')}
             >
               <span>6 Months</span>
               <span className="ten-discount-badge">Save 30%</span>
             </button>
-            <button 
+            <button
               className={`ten-pill ${tenure === '12m' ? 'active' : ''}`}
               onClick={() => setTenure('12m')}
             >
@@ -143,8 +144,8 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
             const totalCost = rawMonthly * currentMultiplier.months;
 
             return (
-              <div 
-                key={plan.id} 
+              <div
+                key={plan.id}
                 className={`plan-item-box executive-card ${plan.popular ? 'highlighted-plan' : ''}`}
               >
                 {plan.popular && (
@@ -191,10 +192,10 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                   ))}
                 </div>
 
-                <button 
+                <button
                   className={`w-full ${plan.popular ? 'btn-purple-primary' : 'btn-purple-secondary'}`}
                   style={{ padding: '13px', fontSize: '14px', borderRadius: '8px' }}
-                  onClick={() => onSelectPlan({ ...plan, tenure, rawMonthly, totalCost })}
+                  onClick={() => onSelectPlan?.({ ...plan, tenure, rawMonthly, totalCost })}
                 >
                   <span>Select {plan.name}</span>
                   <ChevronRight size={16} />

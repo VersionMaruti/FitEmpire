@@ -2,12 +2,12 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgis/postgis:16-3.4-alpine
     container_name: fitempire-postgres
     environment:
-      POSTGRES_DB: fitempire
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: ${DB_NAME:-fitempire}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:

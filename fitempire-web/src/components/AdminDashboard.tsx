@@ -1,26 +1,27 @@
+"use client"
 import React, { useState } from 'react';
-import { 
-  ShieldCheck, 
-  Building2, 
-  Users, 
-  CreditCard, 
-  TrendingUp, 
-  CheckCircle2, 
-  XCircle, 
-  AlertCircle, 
-  DollarSign, 
-  Search, 
-  Filter, 
-  ArrowLeft, 
-  Download, 
-  RefreshCw, 
-  Zap, 
-  Clock, 
-  MapPin, 
-  Check, 
-  ChevronRight, 
-  Activity, 
-  Lock, 
+import {
+  ShieldCheck,
+  Building2,
+  Users,
+  CreditCard,
+  TrendingUp,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  DollarSign,
+  Search,
+  Filter,
+  ArrowLeft,
+  Download,
+  RefreshCw,
+  Zap,
+  Clock,
+  MapPin,
+  Check,
+  ChevronRight,
+  Activity,
+  Lock,
   LogOut,
   Sliders,
   Send,
@@ -156,22 +157,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
           <form onSubmit={(e) => { e.preventDefault(); setIsAuthenticated(true); }} className="admin-login-form">
             <div className="form-group">
               <label>Admin Email</label>
-              <input 
-                type="email" 
-                value={adminEmail} 
-                onChange={(e) => setAdminEmail(e.target.value)} 
-                required 
+              <input
+                type="email"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                required
                 className="admin-input"
               />
             </div>
 
             <div className="form-group">
               <label>Password</label>
-              <input 
-                type="password" 
-                value={adminPassword} 
-                onChange={(e) => setAdminPassword(e.target.value)} 
-                required 
+              <input
+                type="password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                required
                 className="admin-input"
               />
             </div>
@@ -194,15 +195,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
   }
 
   // Filtered Gyms
-  const filteredGyms = gyms.filter(g => 
-    g.name.toLowerCase().includes(searchFilter.toLowerCase()) || 
+  const filteredGyms = gyms.filter(g =>
+    g.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
     g.city.toLowerCase().includes(searchFilter.toLowerCase()) ||
     g.locality.toLowerCase().includes(searchFilter.toLowerCase())
   );
 
   return (
     <div className="admin-layout-root">
-      
+
       {/* LEFT ADMIN SIDEBAR */}
       <aside className="admin-sidebar">
         <div className="sidebar-brand-box">
@@ -217,8 +218,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
 
         <div className="sidebar-menu-list">
           <div className="menu-category-label">PLATFORM GOVERNANCE</div>
-          
-          <button 
+
+          <button
             className={`sidebar-nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
             onClick={() => setActiveTab('dashboard')}
           >
@@ -226,7 +227,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
             <span>Dashboard Overview</span>
           </button>
 
-          <button 
+          <button
             className={`sidebar-nav-item ${activeTab === 'gyms' ? 'active' : ''}`}
             onClick={() => setActiveTab('gyms')}
           >
@@ -234,7 +235,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
             <span>Partner Gyms (12,450)</span>
           </button>
 
-          <button 
+          <button
             className={`sidebar-nav-item ${activeTab === 'verification' ? 'active' : ''}`}
             onClick={() => setActiveTab('verification')}
           >
@@ -243,7 +244,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
             <span className="sidebar-badge">{gyms.filter(g => g.status === 'PENDING_KYC').length}</span>
           </button>
 
-          <button 
+          <button
             className={`sidebar-nav-item ${activeTab === 'onboarding' ? 'active' : ''}`}
             onClick={() => setActiveTab('onboarding')}
           >
@@ -253,7 +254,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
 
           <div className="menu-category-label">MEMBERS & OPERATIONS</div>
 
-          <button 
+          <button
             className={`sidebar-nav-item ${activeTab === 'members' ? 'active' : ''}`}
             onClick={() => setActiveTab('members')}
           >
@@ -261,7 +262,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
             <span>Subscribers & Passes</span>
           </button>
 
-          <button 
+          <button
             className={`sidebar-nav-item ${activeTab === 'bookings' ? 'active' : ''}`}
             onClick={() => setActiveTab('bookings')}
           >
@@ -269,7 +270,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
             <span>Turnstile Check-ins</span>
           </button>
 
-          <button 
+          <button
             className={`sidebar-nav-item ${activeTab === 'classes' ? 'active' : ''}`}
             onClick={() => setActiveTab('classes')}
           >
@@ -279,7 +280,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
 
           <div className="menu-category-label">FINANCE & BILLING</div>
 
-          <button 
+          <button
             className={`sidebar-nav-item ${activeTab === 'settlements' ? 'active' : ''}`}
             onClick={() => setActiveTab('settlements')}
           >
@@ -287,7 +288,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
             <span>Weekly Settlements</span>
           </button>
 
-          <button 
+          <button
             className={`sidebar-nav-item ${activeTab === 'payments' ? 'active' : ''}`}
             onClick={() => setActiveTab('payments')}
           >
@@ -295,7 +296,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
             <span>Razorpay Payments</span>
           </button>
 
-          <button 
+          <button
             className={`sidebar-nav-item ${activeTab === 'analytics' ? 'active' : ''}`}
             onClick={() => setActiveTab('analytics')}
           >
@@ -305,7 +306,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
 
           <div className="menu-category-label">SYSTEM</div>
 
-          <button 
+          <button
             className={`sidebar-nav-item ${activeTab === 'notifications' ? 'active' : ''}`}
             onClick={() => setActiveTab('notifications')}
           >
@@ -313,7 +314,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
             <span>Push Broadcasts</span>
           </button>
 
-          <button 
+          <button
             className={`sidebar-nav-item ${activeTab === 'settings' ? 'active' : ''}`}
             onClick={() => setActiveTab('settings')}
           >
@@ -332,7 +333,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
 
       {/* RIGHT MAIN CONTENT AREA */}
       <main className="admin-main-viewport">
-        
+
         {/* Top App Header */}
         <header className="admin-viewport-header">
           <div className="viewport-header-left">
@@ -371,7 +372,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
         {/* TAB 1: DASHBOARD OVERVIEW */}
         {activeTab === 'dashboard' && (
           <div className="admin-tab-body">
-            
+
             {/* 4 Metric Cards */}
             <div className="metric-cards-grid">
               <div className="kpi-box executive-card">
@@ -413,7 +414,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
 
             {/* Two Column Grid: Real-time Check-ins + Quick Payout */}
             <div className="dashboard-grid-2col">
-              
+
               <div className="admin-card-panel executive-card">
                 <div className="panel-title-bar">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -484,9 +485,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
             <div className="table-search-bar executive-card">
               <div className="search-field-wrap">
                 <Search size={16} color="#94A3B8" />
-                <input 
-                  type="text" 
-                  placeholder="Search gym by name, city, or locality..." 
+                <input
+                  type="text"
+                  placeholder="Search gym by name, city, or locality..."
                   value={searchFilter}
                   onChange={(e) => setSearchFilter(e.target.value)}
                 />
@@ -609,9 +610,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
               <form onSubmit={handleOnboardSubmit} className="onboarding-form">
                 <div className="form-row">
                   <label>Fitness Centre Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Gold's Gym Whitefield" 
+                  <input
+                    type="text"
+                    placeholder="e.g. Gold's Gym Whitefield"
                     value={newGymName}
                     onChange={(e) => setNewGymName(e.target.value)}
                     required
@@ -622,8 +623,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
                 <div className="form-grid-2">
                   <div className="form-row">
                     <label>City</label>
-                    <select 
-                      value={newGymCity} 
+                    <select
+                      value={newGymCity}
                       onChange={(e) => setNewGymCity(e.target.value)}
                       className="admin-input-light"
                     >
@@ -634,9 +635,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
                   </div>
                   <div className="form-row">
                     <label>Locality / Address</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. ITPL Main Road" 
+                    <input
+                      type="text"
+                      placeholder="e.g. ITPL Main Road"
                       value={newGymLocality}
                       onChange={(e) => setNewGymLocality(e.target.value)}
                       required
@@ -648,8 +649,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
                 <div className="form-grid-2">
                   <div className="form-row">
                     <label>Hourly Peak Capacity</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={newGymCapacity}
                       onChange={(e) => setNewGymCapacity(e.target.value)}
                       className="admin-input-light"
@@ -657,8 +658,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
                   </div>
                   <div className="form-row">
                     <label>Tier</label>
-                    <select 
-                      value={newGymTier} 
+                    <select
+                      value={newGymTier}
                       onChange={(e) => setNewGymTier(e.target.value)}
                       className="admin-input-light"
                     >
@@ -858,8 +859,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite 
               <form onSubmit={handleSendNotification} className="onboarding-form">
                 <div className="form-row">
                   <label>Notification Message</label>
-                  <textarea 
-                    rows={4} 
+                  <textarea
+                    rows={4}
                     placeholder="e.g. Flash 48-Hour Sale: Get 45% OFF on 12-Month FitPass All-Access!"
                     value={notificationMsg}
                     onChange={(e) => setNotificationMsg(e.target.value)}

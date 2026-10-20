@@ -1,33 +1,34 @@
 import React from 'react';
 import { Dumbbell, Smartphone, Heart, Zap } from 'lucide-react';
+import { getPartnerAppUrl, getMemberAppUrl } from '@/config/links';
 
 interface FooterProps {
-  onOpenAppModal: () => void;
-  onOpenPartnerModal: () => void;
+  onOpenAppModal?: () => void;
+  onOpenPartnerModal?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onOpenAppModal, onOpenPartnerModal }) => {
   return (
     <footer className="footer-executive">
       <div className="container">
-        
+
         {/* Main Grid */}
         <div className="footer-cols-grid">
-          
+
           {/* Brand Col */}
           <div className="f-column brand-info">
             <div className="f-brand-logo">
               <div className="f-icon-box">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="19" 
-                  height="19" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="19"
+                  height="19"
+                  viewBox="0 0 24 24"
+                  fill="none"
                   stroke="#FFFFFF"
-                  strokeWidth="2.3" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
+                  strokeWidth="2.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}
                 >
                   <path d="M6.5 6.5 17.5 17.5" />
@@ -78,13 +79,13 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAppModal, onOpenPartnerMod
           {/* Partners Col */}
           <div className="f-column">
             <h4 className="f-heading">Ecosystem Portals</h4>
-            <a href="https://fitempiremobile.vercel.app" target="_blank" rel="noreferrer">
+            <a href={getMemberAppUrl()} target="_blank" rel="noreferrer">
               Member Pass App
             </a>
-            <a href="https://fitempirepartner.vercel.app" target="_blank" rel="noreferrer">
+            <a href={getPartnerAppUrl()} target="_blank" rel="noreferrer">
               Partner Reception Portal
             </a>
-            <a href="https://fitempire.tech/?view=admin" target="_blank" rel="noreferrer">
+            <a href="/admin">
               Super Admin Console
             </a>
             <button className="f-purple-link-btn" onClick={onOpenPartnerModal}>

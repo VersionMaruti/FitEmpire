@@ -1,3 +1,4 @@
+'use client';
 import { useState } from 'react';
 import {
   Box, Card, CardContent, Typography, TextField, InputAdornment,
@@ -35,14 +36,14 @@ export function UsersPage() {
   const { data: usersRes, isLoading, isError } = useQuery({
     queryKey: ['users', page, rowsPerPage, search],
     queryFn: () => usersApi.getAll(page, rowsPerPage, search).then((res) => res.data.data),
-    keepPreviousData: true,
+    placeholderData: (prev) => prev,
   });
 
   const deactivateMutation = useMutation({
     mutationFn: (id: string) => usersApi.deactivate(id),
     onSuccess: () => {
       enqueueSnackbar('User account deactivated successfully', { variant: 'success' });
-      queryClient.invalidateQueries(['users']);
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: (err: any) => {
       enqueueSnackbar(err.response?.data?.message || 'Failed to deactivate user', { variant: 'error' });
@@ -53,7 +54,7 @@ export function UsersPage() {
     mutationFn: (id: string) => usersApi.reactivate(id),
     onSuccess: () => {
       enqueueSnackbar('User account reactivated successfully', { variant: 'success' });
-      queryClient.invalidateQueries(['users']);
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: (err: any) => {
       enqueueSnackbar(err.response?.data?.message || 'Failed to reactivate user', { variant: 'error' });

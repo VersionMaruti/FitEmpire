@@ -1,0 +1,7 @@
+{
+    "name": "fitempire-backend",
+    "private": true,
+    "scripts": {
+        "dev": "node dev.js"
+    }
+}

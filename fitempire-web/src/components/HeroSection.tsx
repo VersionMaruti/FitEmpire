@@ -1,13 +1,14 @@
+'use client';
 import React, { useState } from 'react';
-import { 
-  Dumbbell, 
-  MapPin, 
-  Search, 
-  ArrowRight, 
-  Sparkles, 
-  ShieldCheck, 
-  Tv, 
-  Utensils, 
+import {
+  Dumbbell,
+  MapPin,
+  Search,
+  ArrowRight,
+  Sparkles,
+  ShieldCheck,
+  Tv,
+  Utensils,
   Smartphone,
   ChevronRight,
   Zap,
@@ -15,9 +16,9 @@ import {
 } from 'lucide-react';
 
 interface HeroSectionProps {
-  onSearchSubmit: (query: string, category: string) => void;
-  onOpenAppModal: () => void;
-  onOpenPlansModal: () => void;
+  onSearchSubmit?: (query: string, category: string) => void;
+  onOpenAppModal?: () => void;
+  onOpenPlansModal?: () => void;
 }
 
 const ECOSYSTEM_PILLARS = [
@@ -59,10 +60,10 @@ const ECOSYSTEM_PILLARS = [
   }
 ];
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ 
-  onSearchSubmit, 
-  onOpenAppModal, 
-  onOpenPlansModal 
+export const HeroSection: React.FC<HeroSectionProps> = ({
+  onSearchSubmit,
+  onOpenAppModal,
+  onOpenPlansModal
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -74,13 +75,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   return (
     <section className="hero-executive-section">
-      
+
       {/* Background Subtle Gradient Blobs */}
       <div className="hero-blob blob-1"></div>
       <div className="hero-blob blob-2"></div>
 
       <div className="container hero-inner">
-        
+
         {/* Top Trust Badge */}
         <div className="hero-badge-wrap">
           <div className="badge-pill-purple">
@@ -103,9 +104,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <form onSubmit={handleSearch} className="hero-search-form executive-card">
           <div className="search-field">
             <MapPin size={18} className="search-icon text-purple" />
-            <input 
-              type="text" 
-              placeholder="Search gyms in Koramangala, Indiranagar, Bandra, Connaught Place..." 
+            <input
+              type="text"
+              placeholder="Search gyms in Koramangala, Indiranagar, Bandra, Connaught Place..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
@@ -141,9 +142,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* 4 Premium Product Pillars Cards */}
         <div className="hero-four-pillars-grid">
           {ECOSYSTEM_PILLARS.map((pillar) => (
-            <a 
-              key={pillar.id} 
-              href={`#${pillar.id}-service`} 
+            <a
+              key={pillar.id}
+              href={`#${pillar.id}-service`}
               className="pillar-card executive-card"
             >
               <div className="pillar-image-wrap">

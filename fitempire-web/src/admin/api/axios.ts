@@ -2,7 +2,11 @@ import axios, { AxiosError } from 'axios';
 import type { AxiosInstance, AxiosResponse } from 'axios';
 
 // Support relative /api when hosted on HTTPS (Netlify) to prevent Mixed Content errors
-let rawBase = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '').trim();
+let rawBase = (
+  (typeof process !== 'undefined' && (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.VITE_API_BASE_URL || process.env.VITE_API_URL)) ||
+  ''
+).trim();
+
 
 if (!rawBase) {
   if (typeof window !== 'undefined' && window.location.protocol === 'https:') {

@@ -131,7 +131,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     partner.setDisplayName("FitEmpire Flagship Partner");
                     partner.setRole(UserRole.GYM_PARTNER);
                     String targetPhone = partnerEmail.contains(".tech") ? "+919880072520" : "+919880072521";
-                    if (!userRepository.existsByPhoneAndDeletedFalse(targetPhone)) {
+                    if (!userRepository.existsByPhone(targetPhone)) {
                         partner.setPhone(targetPhone);
                     }
                     partner.setActive(true);
@@ -161,7 +161,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     customer.setDisplayName("Rahul Sharma");
                     customer.setRole(UserRole.CUSTOMER);
                     String targetPhone = userEmail.contains(".tech") ? "+919876543210" : "+919876543211";
-                    if (!userRepository.existsByPhoneAndDeletedFalse(targetPhone)) {
+                    if (!userRepository.existsByPhone(targetPhone)) {
                         customer.setPhone(targetPhone);
                     }
                     customer.setActive(true);

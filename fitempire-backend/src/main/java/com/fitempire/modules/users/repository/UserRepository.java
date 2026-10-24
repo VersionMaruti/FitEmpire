@@ -31,6 +31,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByPhoneAndDeletedFalse(String phone);
 
+    boolean existsByPhone(String phone);
+
     @Query("SELECT u FROM User u WHERE u.deleted = false AND u.role = :role ORDER BY u.createdAt DESC")
     Page<User> findAllByRole(@Param("role") UserRole role, Pageable pageable);
 

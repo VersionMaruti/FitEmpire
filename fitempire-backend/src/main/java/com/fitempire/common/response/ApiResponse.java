@@ -50,6 +50,21 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    public static <T> ApiResponse<T> error(int statusCode, String message) {
+        return ApiResponse.<T>builder()
+                .success(false)
+                .message(message)
+                .errorCode(String.valueOf(statusCode))
+                .build();
+    }
+
+    public static <T> ApiResponse<T> error(String message) {
+        return ApiResponse.<T>builder()
+                .success(false)
+                .message(message)
+                .build();
+    }
+
     public static <T> ApiResponse<T> error(String message, String errorCode, String traceId) {
         return ApiResponse.<T>builder()
                 .success(false)

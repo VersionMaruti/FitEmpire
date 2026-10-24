@@ -123,13 +123,13 @@ public class EcosystemController {
         int quantity = ((Number) orderRequest.getOrDefault("quantity", 1)).intValue();
 
         if (!PRODUCT_STOCK.containsKey(productId)) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(400, "Invalid product ID: " + productId));
+            return ResponseEntity.badRequest().body(ApiResponse.error("Invalid product ID: " + productId, "INVALID_PRODUCT"));
         }
 
         synchronized (PRODUCT_STOCK) {
             int currentStock = PRODUCT_STOCK.get(productId);
             if (currentStock < quantity) {
-                return ResponseEntity.badRequest().body(ApiResponse.error(400, "Insufficient stock. Only " + currentStock + " units available."));
+                return ResponseEntity.badRequest().body(ApiResponse.error("Insufficient stock. Only " + currentStock + " units available.", "INSUFFICIENT_STOCK"));
             }
             int updatedStock = currentStock - quantity;
             PRODUCT_STOCK.put(productId, updatedStock);
@@ -179,13 +179,13 @@ public class EcosystemController {
         String patientEmail = bookingRequest.getOrDefault("patientEmail", "");
 
         if (doctorId.isBlank() || slot.isBlank()) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(400, "Doctor ID and appointment slot are required."));
+            return ResponseEntity.badRequest().body(ApiResponse.error("Doctor ID and appointment slot are required.", "INVALID_REQUEST"));
         }
 
         String slotKey = doctorId + ":" + slot;
         synchronized (BOOKED_APPOINTMENTS) {
             if (BOOKED_APPOINTMENTS.containsKey(slotKey)) {
-                return ResponseEntity.status(409).body(ApiResponse.error(409, "This doctor slot (" + slot + ") is already booked by another patient. Please choose another time."));
+                return ResponseEntity.status(409).body(ApiResponse.error("This doctor slot (" + slot + ") is already booked by another patient. Please choose another time.", "SLOT_ALREADY_BOOKED"));
             }
 
             Map<String, Object> appointment = new LinkedHashMap<>();
@@ -208,7 +208,7 @@ public class EcosystemController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> cancelDoctorAppointment(@RequestBody Map<String, String> cancelRequest) {
         String appointmentId = cancelRequest.getOrDefault("appointmentId", "");
         if (appointmentId.isBlank()) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(400, "Appointment ID is required."));
+            return ResponseEntity.badRequest().body(ApiResponse.error("Appointment ID is required.", "INVALID_REQUEST"));
         }
 
         synchronized (BOOKED_APPOINTMENTS) {
@@ -221,7 +221,7 @@ public class EcosystemController {
             }
 
             if (targetEntry == null) {
-                return ResponseEntity.badRequest().body(ApiResponse.error(404, "Appointment not found: " + appointmentId));
+                return ResponseEntity.status(404).body(ApiResponse.error("Appointment not found: " + appointmentId, "APPOINTMENT_NOT_FOUND"));
             }
 
             String scheduledTimeStr = (String) targetEntry.getValue().get("scheduledTime");
@@ -229,8 +229,9 @@ public class EcosystemController {
             long hoursUntilAppointment = Duration.between(Instant.now(), scheduledTime).toHours();
 
             if (hoursUntilAppointment < 12) {
-                return ResponseEntity.badRequest().body(ApiResponse.error(400,
-                        "Cancellations must be made at least 12 hours before the scheduled appointment. Time remaining: " + hoursUntilAppointment + " hours."));
+                return ResponseEntity.badRequest().body(ApiResponse.error(
+                        "Cancellations must be made at least 12 hours before the scheduled appointment. Time remaining: " + hoursUntilAppointment + " hours.",
+                        "CANCELLATION_POLICY_VIOLATION"));
             }
 
             BOOKED_APPOINTMENTS.remove(targetEntry.getKey());

@@ -1,5 +1,16 @@
-import React, { useState } from 'react';
-import { Plus, Calendar, Clock, User, CheckCircle2, X, Users, ChevronRight, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Plus, Calendar, Clock, User, CheckCircle2, X, Users,
+  ChevronRight, Check, AlertTriangle, ShieldCheck, UserCheck
+} from 'lucide-react';
+
+interface ClassMember {
+  id: string;
+  name: string;
+  phone: string;
+  attended: boolean;
+  corporateCompany?: string;
+}
 
 interface ClassItem {
   id: string;
@@ -9,80 +20,83 @@ interface ClassItem {
   capacity: number;
   booked: number;
   room: string;
-  members: Array<{ id: string; name: string; phone: string; attended: boolean }>;
+  members: ClassMember[];
 }
 
+const INITIAL_CLASSES: ClassItem[] = [
+  {
+    id: 'cls-1',
+    name: 'High-Intensity CrossFit',
+    trainer: 'Coach Vikram',
+    time: '06:30 PM',
+    capacity: 20,
+    booked: 18,
+    room: 'Studio 1',
+    members: [
+      { id: 'm1', name: 'Rahul Sharma', phone: '+91 98800 72520', attended: true },
+      { id: 'm2', name: 'Priya Patel', phone: '+91 98765 43210', attended: true },
+      { id: 'm3', name: 'Amit Kumar', phone: '+91 94104 30095', attended: false, corporateCompany: 'Infosys' },
+      { id: 'm4', name: 'Sneha Verma', phone: '+91 94567 81234', attended: false, corporateCompany: 'Wipro' },
+    ],
+  },
+  {
+    id: 'cls-2',
+    name: 'Power Yoga & Core',
+    trainer: 'Sarah Chen',
+    time: '07:30 PM',
+    capacity: 15,
+    booked: 15, // At capacity (FE-116)
+    room: 'Studio 2',
+    members: [
+      { id: 'm5', name: 'Ananya Roy', phone: '+91 95432 19876', attended: true },
+      { id: 'm6', name: 'Kavita Singh', phone: '+91 97654 32190', attended: true },
+      { id: 'm7', name: 'Pooja Hegde', phone: '+91 98111 22334', attended: false },
+    ],
+  },
+  {
+    id: 'cls-3',
+    name: 'Zumba Cardio Blast (Corporate Special)',
+    trainer: 'Pooja Hegde',
+    time: '08:30 PM',
+    capacity: 25,
+    booked: 22,
+    room: 'Studio 1',
+    members: [
+      { id: 'm8', name: 'Rohan Gupta', phone: '+91 96543 21987', attended: false, corporateCompany: 'TCS Batch' },
+      { id: 'm9', name: 'Deepak Joshi', phone: '+91 94321 98765', attended: false, corporateCompany: 'TCS Batch' },
+      { id: 'm10', name: 'Megha Rastogi', phone: '+91 93322 11000', attended: false, corporateCompany: 'TCS Batch' },
+      { id: 'm11', name: 'Karan Mehra', phone: '+91 92211 00998', attended: false, corporateCompany: 'TCS Batch' },
+    ],
+  },
+];
+
 export const ClassesPage: React.FC = () => {
-  const [classes, setClasses] = useState<ClassItem[]>([
-    {
-      id: '1',
-      name: 'High-Intensity Crossfit',
-      trainer: 'Coach Vikram',
-      time: '06:30 PM',
-      capacity: 20,
-      booked: 18,
-      room: 'Studio 1',
-      members: [
-        { id: 'm1', name: 'Rahul Sharma', phone: '+91 98800 72520', attended: true },
-        { id: 'm2', name: 'Priya Patel', phone: '+91 98765 43210', attended: true },
-        { id: 'm3', name: 'Amit Kumar', phone: '+91 94104 30095', attended: false },
-        { id: 'm4', name: 'Sneha Verma', phone: '+91 94567 81234', attended: false },
-      ],
-    },
-    {
-      id: '2',
-      name: 'Power Yoga & Core',
-      trainer: 'Sarah Chen',
-      time: '07:30 PM',
-      capacity: 15,
-      booked: 14,
-      room: 'Studio 2',
-      members: [
-        { id: 'm5', name: 'Ananya Roy', phone: '+91 95432 19876', attended: true },
-        { id: 'm6', name: 'Kavita Singh', phone: '+91 97654 32190', attended: false },
-      ],
-    },
-    {
-      id: '3',
-      name: 'Zumba Cardio Blast',
-      trainer: 'Pooja Hegde',
-      time: '08:30 PM',
-      capacity: 20,
-      booked: 20,
-      room: 'Studio 1',
-      members: [
-        { id: 'm7', name: 'Rohan Gupta', phone: '+91 96543 21987', attended: true },
-        { id: 'm8', name: 'Deepak Joshi', phone: '+91 94321 98765', attended: true },
-      ],
-    },
-    {
-      id: '4',
-      name: 'Olympic Weightlifting',
-      trainer: 'Karan Mehra',
-      time: '06:00 AM',
-      capacity: 12,
-      booked: 9,
-      room: 'Iron Zone',
-      members: [
-        { id: 'm9', name: 'Vihaan Malhotra', phone: '+91 93210 98765', attended: false },
-      ],
-    },
-  ]);
+  // 🛡️ Persistent Classes Store (FE-032)
+  const [classes, setClasses] = useState<ClassItem[]>(() => {
+    const saved = localStorage.getItem('fitempire_partner_classes_data');
+    return saved ? JSON.parse(saved) : INITIAL_CLASSES;
+  });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<ClassItem | null>(null);
 
+  // Form State
   const [name, setName] = useState('');
   const [trainer, setTrainer] = useState('');
   const [time, setTime] = useState('');
   const [capacity, setCapacity] = useState('20');
   const [room, setRoom] = useState('Studio 1');
 
+  // Persist state updates (FE-032)
+  useEffect(() => {
+    localStorage.setItem('fitempire_partner_classes_data', JSON.stringify(classes));
+  }, [classes]);
+
   const handleAddClass = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !trainer || !time) return;
     const newClass: ClassItem = {
-      id: String(Date.now()),
+      id: 'cls-' + Date.now().toString().slice(-4),
       name,
       trainer,
       time,
@@ -91,7 +105,8 @@ export const ClassesPage: React.FC = () => {
       room,
       members: [],
     };
-    setClasses([newClass, ...classes]);
+    const updated = [newClass, ...classes];
+    setClasses(updated);
     setModalOpen(false);
     setName('');
     setTrainer('');
@@ -116,16 +131,33 @@ export const ClassesPage: React.FC = () => {
     );
   };
 
+  // 🛡️ Bulk Check-in for Group / Corporate Batches (FE-110)
+  const handleBulkCheckInAll = (classId: string) => {
+    setClasses((prev) =>
+      prev.map((c) => {
+        if (c.id === classId) {
+          const updatedMembers = c.members.map((m) => ({ ...m, attended: true }));
+          const updated = { ...c, members: updatedMembers };
+          if (selectedBatch?.id === classId) {
+            setSelectedBatch(updated);
+          }
+          return updated;
+        }
+        return c;
+      })
+    );
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFF' }}>
-            Class Schedules
+            Class Schedules & Batch Turnstile
           </h1>
           <p style={{ color: '#94A3B8', fontSize: '0.75rem' }}>
-            Workout batches, trainer roster & attendance
+            Live studio capacity monitoring, bulk group check-in & roster management
           </p>
         </div>
 
@@ -135,151 +167,209 @@ export const ClassesPage: React.FC = () => {
           style={{ padding: '6px 12px', fontSize: '0.72rem' }}
         >
           <Plus size={14} />
-          <span>Add Batch</span>
+          <span>Add Batch Schedule</span>
         </button>
       </div>
 
-      {/* Classes List */}
+      {/* Class Cards Grid */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {classes.map((c) => (
-          <div
-            key={c.id}
-            className="glass-panel"
-            style={{ padding: 14, cursor: 'pointer', transition: 'all 0.15s ease' }}
-            onClick={() => setSelectedBatch(c)}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-              <div>
-                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#FFF', display: 'block' }}>
-                  {c.name}
-                </span>
-                <span style={{ fontSize: '0.7rem', color: '#A5B4FC', fontWeight: 600 }}>
-                  Trainer: {c.trainer} • {c.room}
-                </span>
-              </div>
+        {classes.map((cls) => {
+          const activeAttendedCount = cls.members.filter((m) => m.attended).length;
+          // FE-116: Check studio overcrowding
+          const isAtMaxCapacity = cls.booked >= cls.capacity || activeAttendedCount >= cls.capacity;
 
-              <span
-                className={c.booked >= c.capacity ? 'badge-purple' : 'badge-emerald'}
-                style={{ fontSize: '0.62rem', padding: '2px 6px' }}
-              >
-                {c.booked >= c.capacity ? 'FULL' : `${c.capacity - c.booked} SLOTS LEFT`}
-              </span>
-            </div>
-
+          return (
             <div
+              key={cls.id}
+              className="glass-panel"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                borderRadius: 10,
-                padding: '8px 10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                padding: 14,
+                border: isAtMaxCapacity ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
+                backgroundColor: isAtMaxCapacity ? 'rgba(239, 68, 68, 0.04)' : undefined
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Clock size={12} color="#38BDF8" />
-                <span style={{ fontSize: '0.72rem', color: '#38BDF8', fontWeight: 700 }}>
-                  {c.time}
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <strong style={{ fontSize: '0.92rem', color: '#FFF' }}>{cls.name}</strong>
+                    <span style={{ fontSize: '0.65rem', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#60A5FA', padding: '2px 6px', borderRadius: 6, fontWeight: 700 }}>
+                      {cls.room}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.72rem', color: '#94A3B8', display: 'block', marginTop: 2 }}>
+                    Trainer: <strong style={{ color: '#E2E8F0' }}>{cls.trainer}</strong> • Time: <strong style={{ color: '#A5B4FC' }}>{cls.time}</strong>
+                  </span>
+                </div>
+
+                {/* Capacity Counter & Warning (FE-116) */}
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}>
+                    <Users size={13} color={isAtMaxCapacity ? '#EF4444' : '#10B981'} />
+                    <span style={{ fontSize: '0.78rem', fontWeight: 800, color: isAtMaxCapacity ? '#EF4444' : '#10B981' }}>
+                      {activeAttendedCount} Present / {cls.capacity} Cap
+                    </span>
+                  </div>
+                  {isAtMaxCapacity && (
+                    <span style={{ fontSize: '0.62rem', color: '#EF4444', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
+                      <AlertTriangle size={10} /> Max Capacity Reached
+                    </span>
+                  )}
+                </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Users size={12} color="#10B981" />
-                <span style={{ fontSize: '0.72rem', color: '#FFF', fontWeight: 800 }}>
-                  {c.booked}/{c.capacity} Members
+              {/* Action Buttons: Bulk Check-In & Details (FE-110) */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10 }}>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button
+                    onClick={() => handleBulkCheckInAll(cls.id)}
+                    style={{
+                      backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                      border: '1px solid rgba(16, 185, 129, 0.35)',
+                      color: '#34D399',
+                      borderRadius: 8,
+                      padding: '4px 10px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                    title="Check-in all pre-booked members in one click"
+                  >
+                    <UserCheck size={12} />
+                    <span>Bulk Check-In All ({cls.members.length})</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedBatch(cls)}
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#38BDF8',
+                      borderRadius: 8,
+                      padding: '4px 10px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                  >
+                    <span>View Roster ({cls.members.length})</span>
+                    <ChevronRight size={12} />
+                  </button>
+                </div>
+
+                <span style={{ fontSize: '0.65rem', color: '#64748B' }}>
+                  {cls.members.filter((m) => !m.attended).length} Pending Arrival
                 </span>
-                <ChevronRight size={14} color="#64748B" style={{ marginLeft: 4 }} />
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Batch Member Roster Modal */}
+      {/* Roster & Attendance Inspection Drawer */}
       {selectedBatch && (
         <div
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.88)',
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.75)',
+            zIndex: 9999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 16,
-            zIndex: 100,
+            padding: 16
           }}
         >
           <div
-            className="glass-panel animate-popin"
+            className="glass-panel"
             style={{
-              width: '100%',
               backgroundColor: '#0F172A',
-              border: '1px solid rgba(59, 130, 246, 0.4)',
-              padding: 18,
+              border: '1px solid #3B82F6',
+              borderRadius: 16,
+              maxWidth: 480,
+              width: '100%',
+              padding: 20
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <div>
-                <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#FFF', display: 'block' }}>
-                  {selectedBatch.name} Roster
-                </span>
-                <span style={{ fontSize: '0.7rem', color: '#38BDF8' }}>
+                <strong style={{ fontSize: '0.95rem', color: '#FFF' }}>{selectedBatch.name}</strong>
+                <span style={{ fontSize: '0.7rem', color: '#38BDF8', display: 'block' }}>
                   {selectedBatch.time} • Trainer: {selectedBatch.trainer}
                 </span>
               </div>
-              <button
-                onClick={() => setSelectedBatch(null)}
-                style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer' }}
-              >
+              <button onClick={() => setSelectedBatch(null)} style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer' }}>
                 <X size={18} />
               </button>
             </div>
 
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#94A3B8', display: 'block', marginBottom: 8 }}>
-              REGISTERED MEMBERS ({selectedBatch.members.length})
-            </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <span style={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 700 }}>
+                BATCH ROSTER ATTENDEES ({selectedBatch.members.length})
+              </span>
+              <button
+                onClick={() => handleBulkCheckInAll(selectedBatch.id)}
+                style={{
+                  backgroundColor: '#10B981',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '4px 8px',
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  cursor: 'pointer'
+                }}
+              >
+                ✓ Mark All Checked-in
+              </button>
+            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 240, overflowY: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 300, overflowY: 'auto' }}>
               {selectedBatch.members.map((m) => (
                 <div
                   key={m.id}
                   style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.07)',
                     borderRadius: 10,
-                    padding: '8px 10px',
+                    padding: '8px 12px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
+                    justifyContent: 'space-between'
                   }}
                 >
                   <div>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#FFF', display: 'block' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#FFF', display: 'block' }}>
                       {m.name}
                     </span>
-                    <span style={{ fontSize: '0.65rem', color: '#94A3B8' }}>{m.phone}</span>
+                    <span style={{ fontSize: '0.65rem', color: '#94A3B8' }}>
+                      {m.phone} {m.corporateCompany ? `• 🏢 ${m.corporateCompany}` : ''}
+                    </span>
                   </div>
 
                   <button
                     onClick={() => toggleMemberAttended(selectedBatch.id, m.id)}
                     style={{
-                      backgroundColor: m.attended ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.08)',
-                      border: `1px solid ${m.attended ? '#10B981' : 'rgba(255, 255, 255, 0.2)'}`,
-                      borderRadius: 8,
-                      padding: '4px 8px',
+                      backgroundColor: m.attended ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.08)',
+                      border: m.attended ? '1px solid #10B981' : '1px solid rgba(255,255,255,0.15)',
                       color: m.attended ? '#10B981' : '#94A3B8',
+                      borderRadius: 8,
+                      padding: '4px 10px',
                       fontSize: '0.68rem',
-                      fontWeight: 800,
+                      fontWeight: 700,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 4,
+                      gap: 4
                     }}
                   >
                     {m.attended ? <Check size={12} /> : null}
-                    <span>{m.attended ? 'Attended' : 'Mark Present'}</span>
+                    <span>{m.attended ? 'Checked In' : 'Tap to Check In'}</span>
                   </button>
                 </div>
               ))}
@@ -288,7 +378,7 @@ export const ClassesPage: React.FC = () => {
             <button
               onClick={() => setSelectedBatch(null)}
               className="btn-primary"
-              style={{ width: '100%', marginTop: 14, padding: '10px' }}
+              style={{ width: '100%', marginTop: 14, padding: 10, fontSize: '0.78rem' }}
             >
               Done
             </button>
@@ -296,127 +386,99 @@ export const ClassesPage: React.FC = () => {
         </div>
       )}
 
-      {/* Add Class Modal */}
+      {/* Add Batch Modal */}
       {modalOpen && (
         <div
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.85)',
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            zIndex: 9999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 16,
-            zIndex: 100,
+            padding: 16
           }}
         >
           <div
-            className="glass-panel animate-popin"
+            className="glass-panel"
             style={{
-              width: '100%',
               backgroundColor: '#0F172A',
-              border: '1px solid rgba(59, 130, 246, 0.4)',
-              padding: 20,
+              border: '1px solid #7C3AED',
+              borderRadius: 16,
+              maxWidth: 400,
+              width: '100%',
+              padding: 20
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <span style={{ fontSize: '1rem', fontWeight: 800, color: '#FFF' }}>
-                Add New Class Batch
-              </span>
-              <button
-                onClick={() => setModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer' }}
-              >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <strong style={{ fontSize: '0.9rem', color: '#FFF' }}>Create Workout Batch</strong>
+              <button onClick={() => setModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer' }}>
                 <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleAddClass} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <form onSubmit={handleAddClass} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div>
-                <label style={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 700 }}>Class Name</label>
+                <label style={{ fontSize: '0.68rem', color: '#CBD5E1', display: 'block', marginBottom: 4 }}>Class Name:</label>
                 <input
                   type="text"
-                  placeholder="e.g. Boxing Bootcamp"
+                  required
+                  placeholder="e.g. Boxing Sparring Workshop"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  required
-                  style={{
-                    width: '100%',
-                    background: '#1E293B',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 10,
-                    padding: '8px 10px',
-                    color: '#FFF',
-                    fontSize: '0.8rem',
-                  }}
+                  style={{ width: '100%', padding: '8px 10px', backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 8, color: '#FFF', fontSize: '0.8rem' }}
                 />
               </div>
 
               <div>
-                <label style={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 700 }}>Trainer Name</label>
+                <label style={{ fontSize: '0.68rem', color: '#CBD5E1', display: 'block', marginBottom: 4 }}>Trainer Name:</label>
                 <input
                   type="text"
-                  placeholder="e.g. Coach David"
+                  required
+                  placeholder="e.g. Coach Vikram"
                   value={trainer}
                   onChange={(e) => setTrainer(e.target.value)}
-                  required
-                  style={{
-                    width: '100%',
-                    background: '#1E293B',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 10,
-                    padding: '8px 10px',
-                    color: '#FFF',
-                    fontSize: '0.8rem',
-                  }}
+                  style={{ width: '100%', padding: '8px 10px', backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 8, color: '#FFF', fontSize: '0.8rem' }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 <div>
-                  <label style={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 700 }}>Time</label>
+                  <label style={{ fontSize: '0.68rem', color: '#CBD5E1', display: 'block', marginBottom: 4 }}>Time:</label>
                   <input
                     type="text"
+                    required
                     placeholder="07:00 PM"
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    required
-                    style={{
-                      width: '100%',
-                      background: '#1E293B',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: 10,
-                      padding: '8px 10px',
-                      color: '#FFF',
-                      fontSize: '0.8rem',
-                    }}
+                    style={{ width: '100%', padding: '8px 10px', backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 8, color: '#FFF', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 700 }}>Capacity</label>
+                  <label style={{ fontSize: '0.68rem', color: '#CBD5E1', display: 'block', marginBottom: 4 }}>Max Capacity:</label>
                   <input
                     type="number"
+                    required
                     value={capacity}
                     onChange={(e) => setCapacity(e.target.value)}
-                    style={{
-                      width: '100%',
-                      background: '#1E293B',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: 10,
-                      padding: '8px 10px',
-                      color: '#FFF',
-                      fontSize: '0.8rem',
-                    }}
+                    style={{ width: '100%', padding: '8px 10px', backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 8, color: '#FFF', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
-              <button type="submit" className="btn-primary" style={{ marginTop: 8 }}>
-                Create Class
-              </button>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <button type="submit" className="btn-primary" style={{ flex: 1, padding: 10, fontSize: '0.78rem' }}>
+                  Save & Publish Schedule
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  style={{ backgroundColor: '#334155', color: '#FFF', border: 'none', borderRadius: 8, padding: '10px 14px', fontSize: '0.78rem', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+              </div>
             </form>
           </div>
         </div>

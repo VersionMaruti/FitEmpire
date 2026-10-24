@@ -10,33 +10,12 @@ export const WelcomePage: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        width: '100%',
-        backgroundColor: '#070B14',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px 10px',
-        fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif",
-      }}
-    >
-      {/* Sleek Mobile Device Frame */}
+    <div className="partner-app-shell" style={{ justifyContent: 'center' }}>
+      {/* Sleek Welcome Card (Responsive on Desktop & Mobile) */}
       <div
+        className="partner-auth-card"
         style={{
-          width: '100%',
-          maxWidth: '420px',
-          height: '100vh',
-          maxHeight: '880px',
-          backgroundColor: '#070B14',
-          borderRadius: '36px',
-          border: '10px solid #1E293B',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.1)',
-          position: 'relative',
+          padding: 0,
           backgroundImage: `url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&auto=format&fit=crop')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',

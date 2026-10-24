@@ -48,7 +48,15 @@ spring:
       connection-timeout: 30000
       idle-timeout: 300000
       max-lifetime: 1200000
+      leak-detection-threshold: 20000
       connection-test-query: SELECT 1
+
+  # ── Jackson Serialization (ISO-8601 UTC) ───────────────────
+  jackson:
+    time-zone: UTC
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+    serialization:
+      write-dates-as-timestamps: false
 
   # ── Flyway ───────────────────────────────────────────────
   flyway:

@@ -164,6 +164,8 @@ export interface Gym {
   totalReviews: number;
   totalMembers: number;
   ownerName: string;
+  logoUrl?: string;
+  coverImageUrl?: string;
   createdAt: string;
 }
 

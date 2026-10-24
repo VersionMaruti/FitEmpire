@@ -355,6 +355,22 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ plan, isOpen, onCl
 // 4. PARTNER ONBOARDING MODAL
 export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) => {
   const [submitted, setSubmitted] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
+
+  const handlePartnerSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // 🛡️ Anti-Spam Honeypot Check:
+    if (honeypot.trim() !== '') {
+      console.warn('🛡️ [Anti-Spam] Bot submission detected and dropped silently:', {
+        honeypotValue: honeypot
+      });
+      onClose();
+      return;
+    }
+
+    setSubmitted(true);
+  };
 
   if (!isOpen) return null;
 
@@ -374,7 +390,24 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
               <p className="modal-subheading">Start receiving verified FitEmpire members and weekly payouts.</p>
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="partner-modal-form">
+            <form onSubmit={handlePartnerSubmit} className="partner-modal-form">
+              {/* Silent Anti-Spam Honeypot Trap (Hidden from humans & screen readers) */}
+              <div
+                style={{ display: 'none', position: 'absolute', left: '-9999px' }}
+                aria-hidden="true"
+              >
+                <label htmlFor="partner_business_url">Business Website</label>
+                <input
+                  id="partner_business_url"
+                  type="text"
+                  name="business_website_url"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </div>
+
               <input type="text" placeholder="Gym / Fitness Studio Name" required className="modal-form-input" />
               <div className="form-grid-2">
                 <input type="text" placeholder="City (e.g. Bengaluru)" required className="modal-form-input" />
@@ -414,6 +447,34 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
 // 5. CORPORATE INQUIRY MODAL
 export const CorporateModal: React.FC<CorporateModalProps> = ({ isOpen, onClose }) => {
   const [submitted, setSubmitted] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  const handleCorporateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailError(null);
+
+    // 🛡️ Anti-Spam Honeypot Check (FE-124):
+    // Real humans will never see or fill this field.
+    if (honeypot.trim() !== '') {
+      console.warn('🛡️ [Anti-Spam] Bot submission detected and dropped silently:', {
+        honeypotValue: honeypot
+      });
+      onClose();
+      return;
+    }
+
+    // 🛡️ Client-Side RFC Email Format Validation (FE-129)
+    const rfcEmailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+    if (!rfcEmailRegex.test(email.trim())) {
+      setEmailError('Please enter a valid RFC-compliant corporate email address (e.g. name@company.com).');
+      return;
+    }
+
+    // Legitimate human submission
+    setSubmitted(true);
+  };
 
   if (!isOpen) return null;
 
@@ -433,10 +494,42 @@ export const CorporateModal: React.FC<CorporateModalProps> = ({ isOpen, onClose 
               <p className="modal-subheading">Tailored employee fitness packages with volume corporate pricing.</p>
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="partner-modal-form">
+            {emailError && (
+              <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid #EF4444', borderRadius: 8, padding: '8px 12px', color: '#EF4444', fontSize: '12px', fontWeight: 600, marginBottom: 12 }}>
+                ⚠️ {emailError}
+              </div>
+            )}
+
+            <form onSubmit={handleCorporateSubmit} className="partner-modal-form">
+              {/* Silent Anti-Spam Honeypot Trap (Hidden from humans & screen readers) */}
+              <div
+                style={{ display: 'none', position: 'absolute', left: '-9999px' }}
+                aria-hidden="true"
+              >
+                <label htmlFor="corp_website_hp">Corporate Website</label>
+                <input
+                  id="corp_website_hp"
+                  type="text"
+                  name="corporate_website_url"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </div>
               <input type="text" placeholder="Company / Organization Name" required className="modal-form-input" />
               <div className="form-grid-2">
-                <input type="email" placeholder="Official Corporate Email" required className="modal-form-input" />
+                <input
+                  type="email"
+                  placeholder="Official Corporate Email"
+                  required
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (emailError) setEmailError(null);
+                  }}
+                  className="modal-form-input"
+                />
                 <input type="tel" placeholder="Contact Number (+91)" required className="modal-form-input" />
               </div>
               <input type="number" placeholder="Approx. Number of Employees (e.g. 250)" required className="modal-form-input" />

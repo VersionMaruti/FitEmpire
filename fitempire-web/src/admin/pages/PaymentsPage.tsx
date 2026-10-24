@@ -56,6 +56,53 @@ export function PaymentsPage() {
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val || 0);
 
+
+  const handleExportCSV = () => {
+    if (!payments || payments.length === 0) {
+      enqueueSnackbar('No transaction records available to export', { variant: 'warning' });
+      return;
+    }
+
+    // 1. Column headers matching FE-130 spec
+    const headers = [
+      'Transaction ID',
+      'User / Customer',
+      'Amount (INR)',
+      'Payment Method',
+      'Status',
+      'Date & Time',
+    ];
+
+    // Helper to safely escape CSV cell content
+    const escapeCSV = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+
+    // 2. Format rows
+    const rows = payments.map((p) => [
+      escapeCSV(p.id),
+      escapeCSV(p.userName || 'Customer'),
+      escapeCSV(p.netAmount || p.amount || 0),
+      escapeCSV(p.paymentMethod || 'RAZORPAY'),
+      escapeCSV(p.status || 'COMPLETED'),
+      escapeCSV(p.createdAt ? dayjs(p.createdAt).format('YYYY-MM-DD HH:mm:ss') : ''),
+    ]);
+
+    // 3. Prepend UTF-8 BOM (\uFEFF) for Excel compatibility on Windows
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+
+    // 4. Trigger browser download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `fitEmpire_transactions_${dayjs().format('YYYY-MM-DD')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    enqueueSnackbar(`Exported ${payments.length} transaction(s) to CSV`, { variant: 'success' });
+  };
+
   const handleConfirmRefund = () => {
     if (!selectedPayment) return;
     refundMutation.mutate({
@@ -82,7 +129,16 @@ export function PaymentsPage() {
 
       <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
         <CardContent sx={{ p: 2 }}>
-          <Box sx={{ mb: 2 }}>
+          <Box
+            sx={{
+              mb: 2,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 2,
+            }}
+          >
             <TextField
               size="small"
               placeholder="Search by transaction ID or user..."
@@ -97,7 +153,25 @@ export function PaymentsPage() {
               }}
               sx={{ width: 340 }}
             />
+
+            <Button
+              variant="outlined"
+              onClick={handleExportCSV}
+              sx={{
+                borderRadius: 2,
+                fontWeight: 700,
+                borderColor: '#43D787',
+                color: '#43D787',
+                '&:hover': {
+                  borderColor: '#2bb66a',
+                  background: 'rgba(67,215,135,0.08)',
+                },
+              }}
+            >
+              📊 Export to CSV
+            </Button>
           </Box>
+
 
           {isLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>

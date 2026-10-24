@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';//For Lazy-loading
 import {
   Building2,
   CheckCircle2,
@@ -9,12 +10,27 @@ import {
   Zap
 } from 'lucide-react';
 
+// Code-split: Only downloaded if the user actually clicks to request a proposal
+const CorporateModal = dynamic(
+  () => import('./Modals').then((mod) => mod.CorporateModal),
+  { ssr: false }
+);
+
 interface CorporateSectionProps {
   onOpenCorporateModal?: () => void;
 }
 
 export const CorporateSection: React.FC<CorporateSectionProps> = ({ onOpenCorporateModal }) => {
   const [employeeCount, setEmployeeCount] = useState(200);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const handleOpen = () => {
+    if (onOpenCorporateModal) {
+      onOpenCorporateModal();
+    } else {
+      setIsModalOpen(true);
+    }
+  };
 
   const estimatedSavings = Math.round(employeeCount * 12500);
   const corporateCostPerEmployee = employeeCount > 500 ? 799 : 999;
@@ -54,7 +70,7 @@ export const CorporateSection: React.FC<CorporateSectionProps> = ({ onOpenCorpor
               </div>
             </div>
 
-            <button className="btn-purple-primary" onClick={onOpenCorporateModal}>
+            <button className="btn-purple-primary" onClick={handleOpen}>
               <Building2 size={16} />
               <span>Request Corporate Proposal & Pitch Deck</span>
             </button>
@@ -94,7 +110,7 @@ export const CorporateSection: React.FC<CorporateSectionProps> = ({ onOpenCorpor
                 </div>
               </div>
 
-              <button className="btn-outline-dark w-full" onClick={onOpenCorporateModal}>
+              <button className="btn-outline-dark w-full" onClick={handleOpen}>
                 <span>Download Sample Pitch Deck</span>
                 <ChevronRight size={15} />
               </button>
@@ -212,6 +228,13 @@ export const CorporateSection: React.FC<CorporateSectionProps> = ({ onOpenCorpor
           }
         }
       `}</style>
+      {/* Lazy-Loaded Corporate Modal */}
+      {isModalOpen && (
+        <CorporateModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </section>
   );
 };

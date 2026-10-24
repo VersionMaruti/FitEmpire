@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 const BookingModal = dynamic(
   () => import('./Modals').then((mod) => mod.BookingModal),
@@ -111,7 +111,20 @@ const SAMPLE_GYMS = [
 export const GymExplorer: React.FC<GymExplorerProps> = ({ onBookGym }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchFilter, setSearchFilter] = useState('');
+  const [activeCity, setActiveCity] = useState<string>('All Cities');
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fitempire_selected_city');
+      if (saved) setActiveCity(saved);
+
+      const handleCityChange = (e: any) => {
+        if (e.detail) setActiveCity(e.detail);
+      };
+      window.addEventListener('fitempire_city_changed', handleCityChange);
+      return () => window.removeEventListener('fitempire_city_changed', handleCityChange);
+    }
+  }, []);
 
   // Local state for the Booking Modal
   const [bookingGym, setBookingGym] = useState<any | null>(null);
@@ -123,14 +136,14 @@ export const GymExplorer: React.FC<GymExplorerProps> = ({ onBookGym }) => {
     }
   };
 
-
   const filteredGyms = SAMPLE_GYMS.filter((gym) => {
     const matchesCat = selectedCategory === 'all' || gym.category === selectedCategory;
+    const matchesCity = activeCity === 'All Cities' || gym.city.toLowerCase() === activeCity.toLowerCase();
     const matchesQuery =
       gym.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
       gym.area.toLowerCase().includes(searchFilter.toLowerCase()) ||
       gym.city.toLowerCase().includes(searchFilter.toLowerCase());
-    return matchesCat && matchesQuery;
+    return matchesCat && (matchesCity || matchesQuery);
   });
 
   return (
@@ -487,7 +500,20 @@ export const GymExplorer: React.FC<GymExplorerProps> = ({ onBookGym }) => {
         }
         @media (max-width: 640px) {
           .gyms-cards-grid {
-            grid-template-columns: 1fr;
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            gap: 16px;
+            padding: 8px 4px 20px;
+            scrollbar-width: none;
+          }
+          .gyms-cards-grid::-webkit-scrollbar {
+            display: none;
+          }
+          .gym-item-card {
+            flex: 0 0 86%;
+            scroll-snap-align: center;
           }
         }
       `}</style>

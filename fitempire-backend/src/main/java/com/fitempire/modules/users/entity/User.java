@@ -10,13 +10,15 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_users_email_deleted", columnNames = {"email", "is_deleted"})
+})
 @Getter
 @Setter
 @NoArgsConstructor
 public class User extends BaseEntity {
 
-    @Column(name = "email", nullable = false, unique = true, length = 255)
+    @Column(name = "email", nullable = false, length = 255)
     private String email;
 
     @Column(name = "phone", length = 20)

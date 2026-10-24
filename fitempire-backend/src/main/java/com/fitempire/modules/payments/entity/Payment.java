@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -25,6 +26,7 @@ public class Payment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @Column(name = "booking_id")
@@ -105,4 +107,22 @@ public class Payment {
 
     @Column(name = "is_settled", nullable = false)
     private boolean isSettled = false;
+
+    public UUID getUserId() {
+        return user != null ? user.getId() : null;
+    }
+
+    public String getUserName() {
+        if (user != null) {
+            try {
+                String first = user.getFirstName();
+                String last = user.getLastName();
+                return (first != null ? first : "") + (last != null ? " " + last : "");
+            } catch (Exception ignored) {
+                return "Customer";
+            }
+        }
+        return "Customer";
+    }
+
 }

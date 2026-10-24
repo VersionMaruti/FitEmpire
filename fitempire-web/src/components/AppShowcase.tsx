@@ -30,6 +30,7 @@ export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
   const [scanVerified, setScanVerified] = useState(false);
   const [mobileNumber, setMobileNumber] = useState('');
   const [linkSent, setLinkSent] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,6 +41,15 @@ export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
 
   const handleSendLink = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 🛡️ Anti-Spam Honeypot Check:
+    if (honeypot.trim() !== '') {
+      console.warn('🛡️ [Anti-Spam] Bot SMS request detected and dropped silently:', {
+        honeypotValue: honeypot
+      });
+      return;
+    }
+
     if (mobileNumber.length >= 10) {
       setLinkSent(true);
       setTimeout(() => setLinkSent(false), 4000);
@@ -76,6 +86,23 @@ export const AppShowcase: React.FC<AppShowcaseProps> = ({ onOpenAppModal }) => {
 
             {/* SMS Link Form */}
             <form onSubmit={handleSendLink} className="sms-purple-form">
+              {/* Silent Anti-Spam Honeypot Trap (Hidden from humans & screen readers) */}
+              <div
+                style={{ display: 'none', position: 'absolute', left: '-9999px' }}
+                aria-hidden="true"
+              >
+                <label htmlFor="sms_bot_decoy">Secondary Contact</label>
+                <input
+                  id="sms_bot_decoy"
+                  type="text"
+                  name="secondary_contact_fax"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </div>
+
               <div className="sms-input-group">
                 <input
                   type="tel"

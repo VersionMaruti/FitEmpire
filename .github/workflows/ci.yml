@@ -49,3 +49,27 @@ jobs:
         run: |
           cd fitempire-partner
           npm run build
+
+  web-portal-build:
+    name: Web Frontend Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: fitempire-web/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          cd fitempire-web
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+      - name: Build Next.js Application
+        run: |
+          cd fitempire-web
+          npm run build

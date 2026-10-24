@@ -59,6 +59,17 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Load saved city from localStorage on client mount (SSR-safe)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedCity = localStorage.getItem('fitempire_selected_city');
+      if (savedCity && CITIES.includes(savedCity)) {
+        setSelectedCity(savedCity);
+      }
+    }
+  }, []);
+
+
   // Click outside to close dropdowns
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -137,6 +148,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                       className={`city-item-btn ${city === selectedCity ? 'selected' : ''}`}
                       onClick={() => {
                         setSelectedCity(city);
+                        if (typeof window !== 'undefined') {
+                          localStorage.setItem('fitempire_selected_city', city);
+                          window.dispatchEvent(new CustomEvent('fitempire_city_changed', { detail: city }));
+                        }
                         setCityDropdownOpen(false);
                       }}
                     >
@@ -304,7 +319,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <a href="#partners" onClick={() => { setMobileMenuOpen(false); onOpenPartnerModal; }}>Partner Your Gym</a>
 
             <div className="mobile-drawer-actions">
-              <button className="btn-nav-admin w-full" onClick={() => { setMobileMenuOpen(false); onOpenAdminModal || (() => { window.location.href = '/admin';}) }}>
+              <button className="btn-nav-admin w-full" onClick={() => { setMobileMenuOpen(false); onOpenAdminModal || (() => { window.location.href = '/admin'; }) }}>
                 <ShieldCheck size={15} />
                 <span>Super Admin Console</span>
               </button>

@@ -12,7 +12,7 @@ import {
   Dashboard, People, FitnessCenter, CardMembership, Payment,
   BarChart, EventNote, Notifications, Settings, ChevronLeft,
   ChevronRight, Logout, NotificationsNone, Search, CalendarMonth,
-  VerifiedUser, CurrencyRupee,
+  VerifiedUser, CurrencyRupee, Loyalty, Business,
 } from '../icons';
 import { Dumbbell } from 'lucide-react';
 import type { AppDispatch, RootState } from '../store';
@@ -29,6 +29,8 @@ const NAV_ITEMS = [
   { label: 'Gyms', icon: <FitnessCenter />, path: '/admin/gyms' },
   { label: 'Memberships', icon: <CardMembership />, path: '/admin/memberships' },
   { label: 'Payments', icon: <Payment />, path: '/admin/payments' },
+  { label: 'Coupons', icon: <Loyalty />, path: '/admin/coupons' },
+  { label: 'Corporate Wellness', icon: <Business />, path: '/admin/corporate' },
   { label: 'Bookings', icon: <EventNote />, path: '/admin/bookings' },
   { label: 'Classes', icon: <CalendarMonth />, path: '/admin/classes' },
   { label: 'Analytics', icon: <BarChart />, path: '/admin/analytics' },

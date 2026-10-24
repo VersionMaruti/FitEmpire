@@ -1,5 +1,6 @@
 package com.fitempire.modules.ai.service;
 
+import com.fitempire.common.exception.RateLimitException;
 import com.fitempire.common.exception.ResourceNotFoundException;
 import com.fitempire.modules.ai.dto.AiRecommendationDto;
 import com.fitempire.modules.ai.entity.AiRecommendation;
@@ -19,9 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.PostConstruct;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,6 +36,9 @@ public class AiRecommendationService {
     private final AiRecommendationRepository aiRecommendationRepository;
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
+
+    private static final int MAX_DAILY_REQUESTS = 5;
+    private final Map<UUID, List<Instant>> userRequestHistory = new ConcurrentHashMap<>();
 
     @Value("${app.openai.api-key:}")
     private String apiKey;
@@ -51,8 +58,36 @@ public class AiRecommendationService {
         }
     }
 
+    private void enforceRateLimit(UUID userId) {
+        Instant now = Instant.now();
+        Instant cutoff = now.minus(Duration.ofHours(24));
+        userRequestHistory.compute(userId, (k, list) -> {
+            List<Instant> recent = list != null
+                    ? list.stream().filter(t -> t.isAfter(cutoff)).collect(Collectors.toList())
+                    : new ArrayList<>();
+            if (recent.size() >= MAX_DAILY_REQUESTS) {
+                throw new RateLimitException("Daily AI recommendation limit reached (max " + MAX_DAILY_REQUESTS + " requests per 24 hours). Please try again tomorrow.");
+            }
+            recent.add(now);
+            return recent;
+        });
+    }
+
+    private String sanitizeGoal(Object rawGoal) {
+        if (rawGoal == null) {
+            return "GENERAL_FITNESS";
+        }
+        String text = rawGoal.toString().replaceAll("[\\r\\n\\t\\{\\}\\[\\]\\\"\\<\\>]", " ").trim();
+        if (text.toLowerCase().matches(".*(ignore|system|instruction|prompt|override|jailbreak|developer mode|dan mode).*")) {
+            log.warn("Detected potential prompt injection in fitness goal: {}", rawGoal);
+            return "GENERAL_FITNESS";
+        }
+        return text.length() > 60 ? text.substring(0, 60) : text;
+    }
+
     @Transactional
     public AiRecommendationDto generateWorkoutRecommendation(UUID userId) {
+        enforceRateLimit(userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> ResourceNotFoundException.of("User", userId));
         UserProfile profile = userProfileRepository.findByUserId(userId)
@@ -78,6 +113,7 @@ public class AiRecommendationService {
 
     @Transactional
     public AiRecommendationDto generateNutritionRecommendation(UUID userId) {
+        enforceRateLimit(userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> ResourceNotFoundException.of("User", userId));
         UserProfile profile = userProfileRepository.findByUserId(userId)
@@ -132,7 +168,7 @@ public class AiRecommendationService {
             messages.add(new ChatMessage("system", "You are an elite fitness coach. Return a JSON object with: { \"title\": \"...\", \"plan\": [\"...\"] } containing a structured workout plan. Do not wrap in markdown or any other tags."));
             messages.add(new ChatMessage("user", String.format(
                     "Create a workout plan for a user. Goal: %s, Height: %s cm, Weight: %s kg, State: %s",
-                    profile.getFitnessGoal(), profile.getHeightCm(), profile.getWeightKg(), profile.getFitnessLevel()
+                    sanitizeGoal(profile.getFitnessGoal()), profile.getHeightCm(), profile.getWeightKg(), profile.getFitnessLevel()
             )));
 
             ChatCompletionRequest request = ChatCompletionRequest.builder()

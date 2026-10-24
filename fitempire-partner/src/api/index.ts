@@ -101,6 +101,10 @@ export const partnerApi = {
     });
   },
 
+  updateGymDetails: (data: any) =>
+    apiClient.put('/gyms/my-gyms', data),
+
   resetPasswordByEmail: (email: string, newPassword = 'Password@123') =>
     apiClient.post('/admin/users/reset-password-by-email', { email, newPassword }),
 };
+

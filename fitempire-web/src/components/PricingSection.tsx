@@ -8,6 +8,7 @@ import {
   Zap,
   Percent
 } from 'lucide-react';
+import { trackEvent } from '../utils/analytics';
 
 interface PricingSectionProps {
   onSelectPlan?: (plan: any) => void;
@@ -25,6 +26,32 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
       case '6m': return { months: 6, discount: 0.30, discountTag: 'SAVE 30%' };
       case '12m': return { months: 12, discount: 0.45, discountTag: 'SAVE 45% • BEST VALUE' };
     }
+  };
+
+  const handleTenureChange = (newTenure: Tenure) => {
+    setTenure(newTenure);
+    const mult = getMultiplier(newTenure);
+    trackEvent('tenure_switched', {
+      category: 'ecommerce',
+      label: `${mult.months}_months`,
+      tenure: newTenure,
+      months: mult.months,
+      discount_percentage: Math.round(mult.discount * 100)
+    });
+  };
+
+  const handleSelectPlan = (plan: typeof PLANS[0], rawMonthly: number, totalCost: number) => {
+    trackEvent('plan_selected', {
+      category: 'ecommerce',
+      label: plan.name,
+      plan_id: plan.id,
+      plan_name: plan.name,
+      tenure,
+      monthly_price: rawMonthly,
+      total_cost: totalCost,
+      currency: 'INR'
+    });
+    onSelectPlan?.({ ...plan, tenure, rawMonthly, totalCost });
   };
 
   const currentMultiplier = getMultiplier(tenure);
@@ -109,27 +136,27 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
           <div className="tenure-switch-strip executive-card">
             <button
               className={`ten-pill ${tenure === '1m' ? 'active' : ''}`}
-              onClick={() => setTenure('1m')}
+              onClick={() => handleTenureChange('1m')}
             >
               1 Month
             </button>
             <button
               className={`ten-pill ${tenure === '3m' ? 'active' : ''}`}
-              onClick={() => setTenure('3m')}
+              onClick={() => handleTenureChange('3m')}
             >
               <span>3 Months</span>
               <span className="ten-discount-badge">Save 15%</span>
             </button>
             <button
               className={`ten-pill ${tenure === '6m' ? 'active' : ''}`}
-              onClick={() => setTenure('6m')}
+              onClick={() => handleTenureChange('6m')}
             >
               <span>6 Months</span>
               <span className="ten-discount-badge">Save 30%</span>
             </button>
             <button
               className={`ten-pill ${tenure === '12m' ? 'active' : ''}`}
-              onClick={() => setTenure('12m')}
+              onClick={() => handleTenureChange('12m')}
             >
               <span>12 Months</span>
               <span className="ten-discount-badge hot">Save 45%</span>
@@ -195,7 +222,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                 <button
                   className={`w-full ${plan.popular ? 'btn-purple-primary' : 'btn-purple-secondary'}`}
                   style={{ padding: '13px', fontSize: '14px', borderRadius: '8px' }}
-                  onClick={() => onSelectPlan?.({ ...plan, tenure, rawMonthly, totalCost })}
+                  onClick={() => handleSelectPlan(plan, rawMonthly, totalCost)}
                 >
                   <span>Select {plan.name}</span>
                   <ChevronRight size={16} />

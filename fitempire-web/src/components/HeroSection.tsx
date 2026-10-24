@@ -14,6 +14,7 @@ import {
   Zap,
   CheckCircle2
 } from 'lucide-react';
+import { trackEvent } from '../utils/analytics';
 
 interface HeroSectionProps {
   onSearchSubmit?: (query: string, category: string) => void;
@@ -69,8 +70,26 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    trackEvent('search_initiated', {
+      category: 'acquisition',
+      label: 'hero_locality_search',
+      query: searchQuery || 'all',
+      location: 'hero_section'
+    });
+    if (onSearchSubmit) {
+      onSearchSubmit(searchQuery, 'ALL');
+    }
     const el = document.getElementById('explore-gyms');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handlePillarClick = (pillar: typeof ECOSYSTEM_PILLARS[0]) => {
+    trackEvent('pillar_explored', {
+      category: 'engagement',
+      label: pillar.name,
+      pillar_id: pillar.id,
+      pillar_tag: pillar.tag
+    });
   };
 
   return (
@@ -146,6 +165,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               key={pillar.id}
               href={`#${pillar.id}-service`}
               className="pillar-card executive-card"
+              onClick={() => handlePillarClick(pillar)}
             >
               <div className="pillar-image-wrap">
                 <img src={pillar.image} alt={pillar.name} className="p-img" />
@@ -372,7 +392,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             border-radius: var(--radius-sm);
           }
           .hero-four-pillars-grid {
-            grid-template-columns: 1fr;
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            gap: 16px;
+            padding: 4px 4px 16px;
+            scrollbar-width: none;
+          }
+          .hero-four-pillars-grid::-webkit-scrollbar {
+            display: none;
+          }
+          .pillar-card {
+            flex: 0 0 84%;
+            scroll-snap-align: center;
           }
         }
       `}</style>

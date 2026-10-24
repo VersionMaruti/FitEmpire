@@ -14,11 +14,15 @@ import {
   ArrowUpRight,
   Flame,
   Dumbbell,
+  ArrowDownRight
 } from 'lucide-react';
 import { partnerApi } from '../api';
 
+type ComparisonPeriod = 'TODAY' | 'WEEK' | 'MONTH';
+
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const [period, setPeriod] = useState<ComparisonPeriod>('TODAY');
 
   const [stats, setStats] = useState({
     checkedInToday: 6,
@@ -26,6 +30,46 @@ export const DashboardPage: React.FC = () => {
     activePassHolders: 48,
     rating: 4.9,
   });
+
+  // Dynamic Metrics by Comparison Period (FE-115)
+  const periodMetrics = {
+    TODAY: {
+      visits: stats.checkedInToday,
+      visitsDiff: '+18.2%',
+      isVisitsPositive: true,
+      visitsVsText: 'vs yesterday (5 visits)',
+      revenue: stats.todayEarnings,
+      revenueDiff: '+15.0%',
+      isRevenuePositive: true,
+      revenueVsText: 'vs yesterday (₹1,000)',
+      members: stats.activePassHolders,
+      membersText: '+3 new members today',
+    },
+    WEEK: {
+      visits: stats.checkedInToday * 6 + 14,
+      visitsDiff: '+24.5%',
+      isVisitsPositive: true,
+      visitsVsText: 'vs last week (40 visits)',
+      revenue: stats.todayEarnings * 6 + 2800,
+      revenueDiff: '+22.1%',
+      isRevenuePositive: true,
+      revenueVsText: 'vs last week (₹8,200)',
+      members: stats.activePassHolders + 6,
+      membersText: '+11 new members this week',
+    },
+    MONTH: {
+      visits: 214,
+      visitsDiff: '+31.4%',
+      isVisitsPositive: true,
+      visitsVsText: 'vs last month (163 visits)',
+      revenue: 42800,
+      revenueDiff: '+29.8%',
+      isRevenuePositive: true,
+      revenueVsText: 'vs last month (₹32,900)',
+      members: 94,
+      membersText: '+28 new monthly subscriptions',
+    },
+  }[period];
 
   const [recentCheckIns, setRecentCheckIns] = useState<Array<{
     id: string;
@@ -52,7 +96,6 @@ export const DashboardPage: React.FC = () => {
   ]);
 
   useEffect(() => {
-    // 1. Fetch live metrics from backend
     partnerApi.getDashboardStats()
       .then((res) => {
         const d = res.data?.data;
@@ -68,7 +111,6 @@ export const DashboardPage: React.FC = () => {
       })
       .catch(() => {});
 
-    // 2. Fetch live attendances
     partnerApi.getAttendances()
       .then((res) => {
         const list = res.data?.data;
@@ -84,7 +126,6 @@ export const DashboardPage: React.FC = () => {
       })
       .catch(() => {});
 
-    // 3. Listen for real-time check-in events
     const handleCheckIn = (e: any) => {
       if (e.detail) {
         setStats((prev) => ({
@@ -101,7 +142,7 @@ export const DashboardPage: React.FC = () => {
             tier: e.detail.passTier || 'FitEmpire All-Access Gold',
             status: 'VERIFIED',
           },
-          ...prev.slice(0, 2),
+          ...prev.slice(0, 4),
         ]);
       }
     };
@@ -112,11 +153,11 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Quick QR Scanner Banner */}
+      {/* Fast Pass Verification Action Card */}
       <div
         className="glass-panel"
         style={{
-          background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.25) 0%, rgba(59, 130, 246, 0.15) 100%)',
+          background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.25) 0%, rgba(59, 130, 246, 0.2) 100%)',
           border: '1px solid rgba(79, 70, 229, 0.4)',
           padding: '14px',
           display: 'flex',
@@ -159,38 +200,84 @@ export const DashboardPage: React.FC = () => {
         </button>
       </div>
 
-      {/* 2x2 Metric Cards Grid */}
+      {/* Date Comparison Period Selector (FE-115) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#FFF' }}>
+          Performance Growth & Analytics
+        </span>
+
+        <div style={{ display: 'flex', gap: 4, backgroundColor: 'rgba(255,255,255,0.04)', padding: 3, borderRadius: 8 }}>
+          {[
+            { label: 'Today', value: 'TODAY' as const },
+            { label: 'This Week', value: 'WEEK' as const },
+            { label: 'This Month', value: 'MONTH' as const },
+          ].map((btn) => (
+            <button
+              key={btn.value}
+              onClick={() => setPeriod(btn.value)}
+              style={{
+                backgroundColor: period === btn.value ? '#3B82F6' : 'transparent',
+                color: period === btn.value ? '#FFF' : '#94A3B8',
+                border: 'none',
+                borderRadius: 6,
+                padding: '3px 8px',
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 2x2 Metric Cards Grid with Previous Period Comparison (FE-115) */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {/* Visits Card */}
         <div className="glass-panel" style={{ padding: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-            <span style={{ fontSize: '0.68rem', color: '#94A3B8', fontWeight: 700 }}>TODAY'S VISITS</span>
+            <span style={{ fontSize: '0.68rem', color: '#94A3B8', fontWeight: 700 }}>
+              {period === 'TODAY' ? "TODAY'S VISITS" : period === 'WEEK' ? 'WEEKLY VISITS' : 'MONTHLY VISITS'}
+            </span>
             <div style={{ width: 24, height: 24, borderRadius: 8, backgroundColor: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Users size={13} color="#38BDF8" />
             </div>
           </div>
           <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFF', display: 'block' }}>
-            {stats.checkedInToday}
+            {periodMetrics.visits}
           </span>
-          <span style={{ fontSize: '0.62rem', color: '#10B981', fontWeight: 700 }}>
-            +18% vs yesterday
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}>
+            <span style={{ fontSize: '0.65rem', color: '#10B981', fontWeight: 800 }}>
+              {periodMetrics.visitsDiff}
+            </span>
+            <span style={{ fontSize: '0.58rem', color: '#64748B' }}>
+              {periodMetrics.visitsVsText}
+            </span>
+          </div>
         </div>
 
         {/* Earnings Card */}
         <div className="glass-panel" style={{ padding: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-            <span style={{ fontSize: '0.68rem', color: '#94A3B8', fontWeight: 700 }}>EST. REVENUE</span>
+            <span style={{ fontSize: '0.68rem', color: '#94A3B8', fontWeight: 700 }}>
+              {period === 'TODAY' ? 'TODAY EARNINGS' : period === 'WEEK' ? 'WEEK REVENUE' : 'MONTH REVENUE'}
+            </span>
             <div style={{ width: 24, height: 24, borderRadius: 8, backgroundColor: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <DollarSign size={13} color="#10B981" />
             </div>
           </div>
           <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#10B981', display: 'block' }}>
-            ₹{stats.todayEarnings.toLocaleString('en-IN')}
+            ₹{periodMetrics.revenue.toLocaleString('en-IN')}
           </span>
-          <span style={{ fontSize: '0.62rem', color: '#A5B4FC', fontWeight: 700 }}>
-            ₹200/visit rate
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}>
+            <span style={{ fontSize: '0.65rem', color: '#10B981', fontWeight: 800 }}>
+              {periodMetrics.revenueDiff}
+            </span>
+            <span style={{ fontSize: '0.58rem', color: '#64748B' }}>
+              {periodMetrics.revenueVsText}
+            </span>
+          </div>
         </div>
 
         {/* Active Members Card */}
@@ -202,10 +289,10 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
           <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFF', display: 'block' }}>
-            {stats.activePassHolders}
+            {periodMetrics.members}
           </span>
-          <span style={{ fontSize: '0.62rem', color: '#38BDF8', fontWeight: 700 }}>
-            Active center access
+          <span style={{ fontSize: '0.58rem', color: '#38BDF8', fontWeight: 700, display: 'block', marginTop: 3 }}>
+            {periodMetrics.membersText}
           </span>
         </div>
 
@@ -218,35 +305,47 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
           <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FBBF24', display: 'block' }}>
-            ★ {stats.rating}
+            4.9 / 5.0
           </span>
-          <span style={{ fontSize: '0.62rem', color: '#94A3B8', fontWeight: 700 }}>
-            Top Rated Venue
+          <span style={{ fontSize: '0.58rem', color: '#10B981', fontWeight: 700, display: 'block', marginTop: 3 }}>
+            Top 2% Partner Gym in Koramangala
           </span>
         </div>
       </div>
 
-      {/* Recent Check-in Feed */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, padding: '0 2px' }}>
+      {/* Live Check-ins Feed */}
+      <div className="glass-panel" style={{ padding: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#FFF' }}>
-            Recent Check-ins
+            Live Reception Desk Check-Ins
           </span>
           <button
             onClick={() => navigate('/attendance')}
-            style={{ background: 'transparent', border: 'none', color: '#38BDF8', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer' }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#38BDF8',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+            }}
           >
-            See All →
+            <span>View All</span>
+            <ArrowUpRight size={12} />
           </button>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {recentCheckIns.map((item) => (
+          {recentCheckIns.map((ci) => (
             <div
-              key={item.id}
-              className="glass-panel"
+              key={ci.id}
               style={{
-                padding: '10px 12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                borderRadius: 10,
+                padding: '8px 10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -255,72 +354,36 @@ export const DashboardPage: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div
                   style={{
-                    width: 30,
-                    height: 30,
+                    width: 28,
+                    height: 28,
                     borderRadius: 8,
-                    backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                    backgroundColor: 'rgba(56, 189, 248, 0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#A5B4FC',
-                    fontSize: '0.78rem',
+                    color: '#38BDF8',
                     fontWeight: 800,
+                    fontSize: '0.75rem',
                   }}
                 >
-                  {item.name[0]}
+                  {ci.name[0]}
                 </div>
                 <div>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#FFF', display: 'block' }}>
-                    {item.name}
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#FFF', display: 'block' }}>
+                    {ci.name}
                   </span>
-                  <span style={{ fontSize: '0.65rem', color: '#38BDF8' }}>{item.tier}</span>
+                  <span style={{ fontSize: '0.65rem', color: '#94A3B8' }}>{ci.tier}</span>
                 </div>
               </div>
-              <span style={{ fontSize: '0.7rem', color: '#A5B4FC', fontWeight: 700 }}>
-                {item.time}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Today's Studio Classes */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, padding: '0 2px' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#FFF' }}>
-            Today's Studio Classes
-          </span>
-          <button
-            onClick={() => navigate('/classes')}
-            style={{ background: 'transparent', border: 'none', color: '#38BDF8', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer' }}
-          >
-            Manage →
-          </button>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {todayClasses.map((c) => (
-            <div
-              key={c.id}
-              className="glass-panel"
-              style={{
-                padding: '10px 12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <div>
-                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#FFF', display: 'block' }}>
-                  {c.name}
+              <div style={{ textAlign: 'right' }}>
+                <span style={{ fontSize: '0.7rem', color: '#A5B4FC', fontWeight: 600, display: 'block' }}>
+                  {ci.time}
                 </span>
-                <span style={{ fontSize: '0.65rem', color: '#94A3B8' }}>
-                  Trainer: {c.trainer} • {c.time}
+                <span className="badge-emerald" style={{ fontSize: '0.55rem', padding: '1px 4px' }}>
+                  VERIFIED
                 </span>
               </div>
-              <span className="badge-emerald" style={{ fontSize: '0.62rem', padding: '2px 6px' }}>
-                {c.booked}/{c.capacity} Booked
-              </span>
             </div>
           ))}
         </div>

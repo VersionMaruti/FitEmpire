@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState } from 'react';
 import { partnerApi } from '../api';
 
+export type PartnerRole = 'OWNER' | 'FRONT_DESK' | 'TRAINER';
+
 export interface PartnerUser {
   id?: string;
   userId?: string;
@@ -11,19 +13,12 @@ export interface PartnerUser {
   gymName?: string;
 }
 
-const DEFAULT_PARTNER: PartnerUser = {
-  id: '407d1eea-9d15-43d9-acc6-e3042be437f7',
-  userId: '407d1eea-9d15-43d9-acc6-e3042be437f7',
-  email: 'partner@fitempire.tech',
-  firstName: 'FitEmpire Partner',
-  role: 'GYM_PARTNER',
-  gymName: 'FitEmpire Flagship • Koramangala',
-};
-
 interface AuthContextType {
   user: PartnerUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  activeRole: PartnerRole;
+  setActiveRole: (role: PartnerRole) => void;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
@@ -35,6 +30,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const saved = localStorage.getItem('fitempire_partner_user');
     return saved ? JSON.parse(saved) : null;
   });
+
+  const [activeRole, setActiveRoleState] = useState<PartnerRole>(() => {
+    const savedRole = localStorage.getItem('fitempire_partner_active_role');
+    return (savedRole as PartnerRole) || 'OWNER';
+  });
+
+  const setActiveRole = (role: PartnerRole) => {
+    setActiveRoleState(role);
+    localStorage.setItem('fitempire_partner_active_role', role);
+  };
+
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const token = localStorage.getItem('fitempire_partner_token');
     return !!token;
@@ -45,14 +51,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const res = await partnerApi.login(email.trim(), password);
-      // Backend returns flat: { accessToken, userId, email, firstName, lastName, role, user:{...} }
       const data = res.data?.data;
       const token = data?.accessToken;
       if (!token) {
         throw new Error('Authentication failed. No token received from server.');
       }
 
-      // Role is at top-level of data, not nested under user
       const role: string = data?.role || data?.user?.role || '';
       if (!['GYM_PARTNER', 'GYM_OWNER', 'SUPER_ADMIN', 'ADMIN'].includes(role)) {
         throw new Error('Access denied. Only Gym Partners can log into this portal.');
@@ -65,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         firstName: data?.firstName || data?.user?.firstName || 'Gym Partner',
         lastName: data?.lastName || data?.user?.lastName || '',
         role: role,
-        gymName: data?.gymName || data?.user?.gymName || 'My Gym',
+        gymName: data?.gymName || data?.user?.gymName || 'FitEmpire Partner Gym',
       };
 
       localStorage.setItem('fitempire_partner_token', token);
@@ -75,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(true);
     } catch (err) {
       setIsLoading(false);
-      throw err; // re-throw so LoginPage.catch() fires
+      throw err;
     }
     setIsLoading(false);
   };
@@ -89,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, activeRole, setActiveRole, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
